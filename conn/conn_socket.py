@@ -1,10 +1,9 @@
 import socket
 
-# to do make neighbour_ip dynamic and port
 class SocketConn:
-    def __init__(self, neighbor_ip):
+    def __init__(self, target_ip:str, target_port:int):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect((neighbor_ip, 179))
+        self.sock.connect((target_ip, target_port))
 
     def send(self, data):
         self.sock.send(data)
