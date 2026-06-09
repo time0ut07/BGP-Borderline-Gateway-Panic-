@@ -10,9 +10,9 @@ def main_menu():
 
         print("\n\n======= Main Menu =======")
         print("1. Connection\n2. Reconnaissance\n3. Hijack\n4. Post-Exploitation\n5. Settings")
-        choice = input("Select an option: ")
+        choice = input(">> ")
 
-        match choice:
+        match str(choice):
             case "1":
                 conn_menu()
             case "2":

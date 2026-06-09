@@ -1,34 +1,19 @@
+# find if bgp port 179 is open?
 # open from peer
 # keepalive exchange (multithread?) to mainatin sess
 
-from scapy.contrib.bgp import *
-from tabulate import tabulate
-from socket import socket
+from scapy.contrib.bgp import BGPHeader, BGPOpen
+from conn.conn_socket import SocketConn
+from misc.grab_settings import get_config
+from misc.print_table import print_settings_table
+from conn.parse_BGP import open_BGP
 
 
 def conn_OPEN():
 
-    configs = ["version", "asn", "hold_time", "bgp_id", "local_ip"]
-    settings = {}
+    config_dict = get_config(["version", "asn", "hold_time", "bgp_id", "neighbor_ip", "neighbor_port"])
 
-    with open("./resources/settings.txt", 'r') as f:
-        for line in f:
-            line = line.strip()
-
-            if not line or line.startswith("#"):
-                continue
-            
-            key, value = line.split("=", 1)
-            settings[key.strip()] = value.strip()
-
-    open_msg_table = [
-        ["version", settings["version"]],
-        ["my_as", settings["asn"]],
-        ["hold_time", settings["hold_time"]],
-        ["bgp_id", settings["bgp_id"]],
-    ]
-
-    print(tabulate(open_msg_table, headers=["Field", "Value"], tablefmt="grid"))
+    print_settings_table(config_dict)
 
     while True:
         send = (input("\n[*] Send BGP OPEN Packet (y/n): ")).lower()
@@ -43,37 +28,34 @@ def conn_OPEN():
                 print("[x] Invalid option")
 
     open_msg = BGPOpen(
-        version=int(settings["version"]),
-        my_as=int(settings["asn"]),
-        hold_time=int(settings["hold_time"]),
-        bgp_id=str(settings["bgp_id"])
+        version=int(config_dict["version"]),
+        my_as=int(config_dict["asn"]),
+        hold_time=int(config_dict["hold_time"]),
+        bgp_id=str(config_dict["bgp_id"])
     )
 
     pkt = BGPHeader(type=1) / open_msg
-    raw_bgp = raw(pkt)
+    print("[+] BGP OPEN packet built")
 
-    print("[+] BGP OPEN packet built...")
+    try:
+        print("[*] Attempting 3 way handshake...")
+        connection = SocketConn(config_dict["neighbor_ip"], int(config_dict["neighbor_port"]))
+        print("[+] TCP connection Established")
+    except:
+        print("[-] Something went wrong")
+        return None
 
+    try:
+        print("[*] Attempting to send OPEN BGP...")
+        connection.send(pkt)
+        print("[+] OPEN BGP sent")
 
-    return "XXXXXX"
-
-
-def send_bgp_OPEN(session, raw_bgp):
-    ip = session["ip"]
-
-    tcp = TCP(
-        sport=session["sport"],
-        dport=session["dport"],
-        flags="PA",
-        seq=session["seq"],
-        ack=session["ack"]
-    )
-
-    resp = sr1(ip/tcp/raw_bgp, timeout=3)
-
-    session["seq"] += len(raw_bgp)
-
-    if resp:
-        session["ack"] = resp.seq + len(resp[Raw].load) if Raw in resp else session["ack"]
-
-    return session, resp
+        print("[*] Waiting for target response...")
+        response = connection.recv()
+        open_BGP(response)
+        print("[+] Response received!")
+    except:
+        print("[-] Something went wrong!!")
+        return None
+    
+    return connection

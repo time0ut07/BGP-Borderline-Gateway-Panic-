@@ -1,3 +1,6 @@
+from conn.conn_run import conn_run
+
+
 def conn_menu():
     """
     Connection (Option 1) Menu
@@ -6,11 +9,11 @@ def conn_menu():
     while True:
         print("\n\n===== Connection Menu =====")
         print("1. OPEN\n2. UPDATE\n")
-        choice = input("Select an option: ")
+        choice = input(">> ")
 
         match choice:
             case "1":
-                return "conn_OPEN"
+                conn_run()
             case "2":
                 return "conn_UPDATE"
             case _:
