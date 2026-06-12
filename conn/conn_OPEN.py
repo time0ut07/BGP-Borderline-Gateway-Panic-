@@ -23,9 +23,10 @@ def conn_OPEN():
                 break
             case 'n':
                 print("[x] Cancelling operation...\n")
-                return 0
+                return None
             case _:
                 print("[x] Invalid option")
+                continue
 
     open_msg = BGPOpen(
         version=int(config_dict["version"]),

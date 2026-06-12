@@ -20,7 +20,7 @@ import socket
 
 def main():
     
-    print("Welcome to Black Girl Power (BGP)")
+    print("\nWelcome to BGP Tool Name\n[help] to see existing commands\n[exit | quit] to exit")
     while True:
         action = main_menu()
 

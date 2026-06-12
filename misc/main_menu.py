@@ -1,28 +1,53 @@
-from conn.conn_menu import conn_menu
+import sys
+
+from command.commands import COMMANDS
+from command.cmd_help import show_help
 
 
 def main_menu():
     """
-    Main Menu Options
+    Command-based interface (fully driven by COMMANDS)
     """
 
     while True:
+        try:
+            raw = input("\nBGP >> ").strip()
 
-        print("\n\n======= Main Menu =======")
-        print("1. Connection\n2. Reconnaissance\n3. Hijack\n4. Post-Exploitation\n5. Settings")
-        choice = input(">> ")
-
-        match str(choice):
-            case "1":
-                conn_menu()
-            case "2":
-                return "recon"
-            case "3":
-                return "hijack"
-            case "4":
-                return "pe"
-            case "5":
-                return "settings"
-            case _:
-                print("[x] Invalid option")
+            if not raw:
                 continue
+
+            if raw.lower() == "help":
+                show_help(COMMANDS)
+                continue
+
+            parts = raw.split()
+
+            cmd = COMMANDS.get(parts[0])
+
+            if not cmd:
+                print(f"[x] Unknown command: {parts[0]}")
+                continue
+
+            if not cmd.subcommands:
+                if cmd.handler:
+                    cmd.handler()
+                else:
+                    print("[x] Command has no action")
+                continue
+
+                print("[x] Missing subcommand")
+                continue
+
+            sub = cmd.subcommands.get(parts[1])
+
+            if not sub:
+                print(f"[x] Unknown subcommand: {parts[1]}")
+                continue
+
+            if sub.handler:
+                sub.handler()
+            else:
+                print("[x] Subcommand has no action")
+
+        except KeyboardInterrupt:
+            print("\n[x] Use 'exit' command to quit")

@@ -1,5 +1,5 @@
 from tabulate import tabulate
-from settings_validation import validate_setting
+from misc.settings_validation import validate_setting
 
 SETTINGS_FILE = "resources/settings.txt"
 
