@@ -6,7 +6,8 @@ from scapy.contrib.bgp import BGPHeader, BGPOpen
 from conn.conn_socket import SocketConn
 from misc.grab_settings import get_config
 from misc.print_table import print_settings_table
-from conn.parse_BGP import open_BGP
+from conn.parse_BGP import parse_open_BGP
+from misc.logging import handle_log
 
 
 def conn_OPEN():
@@ -49,11 +50,13 @@ def conn_OPEN():
     try:
         print("[*] Attempting to send OPEN BGP...")
         connection.send(pkt)
+        handle_log(f"OPEN packet sent to {config_dict["neighbor_ip"]}")
         print("[+] OPEN BGP sent")
 
         print("[*] Waiting for target response...")
         response = connection.recv()
-        open_BGP(response)
+        parse_open_BGP(response)
+        handle_log(f"OPEN packet received from {config_dict["neighbor_ip"]}")
         print("[+] Response received!")
     except:
         print("[-] Something went wrong!!")

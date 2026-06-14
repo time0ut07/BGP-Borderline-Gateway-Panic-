@@ -28,6 +28,7 @@ def main_menu():
                 print(f"[x] Unknown command: {parts[0]}")
                 continue
 
+            # Commands without subcommands (e.g. exit)
             if not cmd.subcommands:
                 if cmd.handler:
                     cmd.handler()
@@ -35,17 +36,39 @@ def main_menu():
                     print("[x] Command has no action")
                 continue
 
-                print("[x] Missing subcommand")
+            # User typed: connection / setting
+            if len(parts) < 2:
+                print(f"\n{cmd.name} commands:")
+
+                for subcmd in cmd.subcommands.values():
+                    print(f"  {subcmd.name:<12} {subcmd.description}")
+
                 continue
 
             sub = cmd.subcommands.get(parts[1])
 
             if not sub:
                 print(f"[x] Unknown subcommand: {parts[1]}")
+
+                print(f"\nAvailable {cmd.name} commands:")
+
+                for subcmd in cmd.subcommands.values():
+                    print(f"  {subcmd.name:<12} {subcmd.description}")
+
+                continue
+
+            args = parts[2:]
+
+            # Only allow args for: setting change
+            if args and not (
+                parts[0] == "setting"
+                and parts[1] == "change"
+            ):
+                print("[x] This command does not accept arguments")
                 continue
 
             if sub.handler:
-                sub.handler()
+                sub.handler(args)
             else:
                 print("[x] Subcommand has no action")
 

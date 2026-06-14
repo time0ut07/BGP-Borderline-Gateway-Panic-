@@ -1,4 +1,4 @@
-def get_config(config_list:list) -> dict:
+def get_config(config_list:list = None) -> dict:
     """
     Get settings value from resources/settings.txt
     """
@@ -16,7 +16,7 @@ def get_config(config_list:list) -> dict:
             key = key.strip()
             value = value.strip()
 
-            if key in config_list:
+            if config_list is None or key in config_list:
                 config_dict[key] = value
 
         return config_dict

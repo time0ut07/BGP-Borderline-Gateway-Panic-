@@ -6,7 +6,7 @@
 ######################################################################
 
 # Things to do
-# exit thread when exit 
+# exit thread when exit
 
 import time
 

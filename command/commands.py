@@ -4,7 +4,8 @@ from typing import Callable
 from command.cmd_help import show_help
 from command.cmd_exit import exit_app
 from conn.conn_run import conn_run
-from misc.settings import settings
+from command.cmd_setting import cmd_change_setting, cmd_view_setting
+from command.cmd_clear_log import clear_all_logs
 
 
 @dataclass
@@ -19,29 +20,33 @@ class Command:
 # Handlers
 # =====================================================
 
-def call_exit():
+def call_exit(args=None):
     exit_app()
 
-def connection_open():
+def connection_open(args=None):
     conn_run("OPEN")
 
 
-def connection_update():
+def connection_update(args=None):
     conn_run("UPDATE")
 
 
-def blackhole():
+def blackhole(args=None):
     print("[+] Running blackhole")
 
 
-def sniff():
+def sniff(args=None):
     print("[+] Sniffing network traffic")
 
-def change_setting():
-    print("[+] Sniffing network traffic")
+def change_setting(args):
+    cmd_change_setting(args)
 
-def view_setting():
-    print("[+] Sniffing network traffic")
+
+def view_setting(args=None):
+    cmd_view_setting()
+
+def clear_logs(args=None):
+    clear_all_logs()
 
 
 # =====================================================
@@ -90,12 +95,6 @@ COMMANDS = {
         },
     ),
 
-    ################################# HAVEN DO THIS YET... CHANGE TO 
-    # setting change local_ip=127.0.0.1 local_port=1
-    #### MAKE SURE HAVE VALIDATION ON 
-    ###### 1. IF THE SETTING EXIST IN SETTINGS.TXT
-    ###### 2. IF VALUES FOR THE SETTINGS IS VALID
-    #### THEN UPDATE
     "setting": Command(
         name="setting",
         description="Modify configuration settings before connection/post-exploit",
@@ -112,5 +111,18 @@ COMMANDS = {
                 handler=view_setting,
             ),
         },
-    )
+    ),
+
+    "clear": Command(
+        name="clear",
+        description="Clear specified file",
+        subcommands={
+            "logs": Command(
+                name="logs",
+                description="Clear log file located in ./resources/logs.txt",
+                handler=clear_logs,
+            ),
+        },
+    ),
+
 }

@@ -2,18 +2,8 @@ import ipaddress
 
 
 OPTIONAL_FIELDS = [
-    "local_ip",
     "neighbor_ip",
-    "neighbor_asn",
-    "announce_prefix",
-    "prefix_length",
-    "next_hop",
-    "as_path",
-    "withdraw_prefix",
-    "withdraw_prefix_length",
-    "local_pref",
-    "med",
-    "community"
+    "neighbor_asn"
 ]
 
 
