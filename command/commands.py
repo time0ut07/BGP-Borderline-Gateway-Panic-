@@ -6,9 +6,8 @@ from command.cmd_exit import exit_app
 from conn.conn_run import conn_run
 from command.cmd_config import cmd_change_config, cmd_view_config
 from command.cmd_clear_log import clear_all_logs
-from conn.parse_BGP import get_connectivity
 
-# ACTIVE_CONNECTION = None
+ACTIVE_CONNECTION = None
 
 
 @dataclass
@@ -27,11 +26,11 @@ def call_exit(args=None):
     exit_app()
 
 def connection_open(args=None):
-    #global ACTIVE_CONNECTION
-    conn_run("OPEN")
+    global ACTIVE_CONNECTION
+    ACTIVE_CONNECTION = conn_run("OPEN")
 
 def connection_update(args=None):
-    conn_run("UPDATE", get_connectivity)
+    conn_run("UPDATE", ACTIVE_CONNECTION)
 
 
 def blackhole(args=None):
@@ -103,7 +102,7 @@ COMMANDS = {
         subcommands={
             "change": Command(
                 name="change",
-                description="Change a configuration",
+                description="Change a configurati",
                 handler=change_config,
             ),
 

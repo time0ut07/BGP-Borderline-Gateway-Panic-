@@ -1,6 +1,10 @@
-Timestamp: 2026-06-16 17:22:12.134294
+Timestamp: 2026-06-16 22:49:01.875108
 Version: 4
-ASN: 65001
+ASN: 65002
 Hold Time: 180
 Router ID: 192.168.28.136
-Connectivity: True
+Withdrawn Routes Len: 0
+Withdrawn Routes: []
+Path Attribute Len: 26
+Path Attribute: [<BGPPathAttr  type_flags=Transitive type_code=ORIGIN attr_len=1 attribute=<BGPPAOrigin  origin=IGP |> |>, <BGPPathAttr  type_flags=Extended-Length+Transitive type_code=AS_PATH attr_ext_len=4 attribute=<BGPPAASPath  segments=[<ASPathSegment  segment_type=AS_SEQUENCE segment_length=1 segment_value=[65002] |>] |> |>, <BGPPathAttr  type_flags=Transitive type_code=NEXT_HOP attr_len=4 attribute=<BGPPANextHop  next_hop=192.168.28.136 |> |>, <BGPPathAttr  type_flags=Optional type_code=MULTI_EXIT_DISC attr_len=4 attribute=<BGPPAMultiExitDisc  med=0 |> |>]
+NLRI: [<BGPNLRI_IPv4  prefix=192.168.28.136/32 |>]

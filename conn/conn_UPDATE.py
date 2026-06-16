@@ -10,6 +10,7 @@ from misc.logging import handle_log
 def receive_UPDATE(conn):
     while True:
         data = conn.recv(4096)
+        print(data)
 
         if not data:
             break
@@ -55,7 +56,7 @@ def thread_UPDATE():
 
 def send_UPDATE(conn):
 
-    config_dict = get_config(['asn', 'neighbor_ip', 'nlri'])
+    config_dict = get_config(['asn', 'neighbor_ip', 'nlri', 'bgp_id'])
 
     print_config_table(config_dict)
 
@@ -72,37 +73,6 @@ def send_UPDATE(conn):
                 print("[x] Invalid option")
                 continue
 
-    # as_path = BGPPathAttr(
-    #     type_flags=0x40,
-    #     type_code=2,
-    #     attribute=BGPPAASPath(
-    #         segments=[
-    #             (2, [config_dict["asn"]])
-    #         ]
-    #     )
-    # )
-
-    # next_hop = BGPPathAttr(
-    #     type_code=3,
-    #     attribute=str(config_dict["neighbor_ip"]) # in profile.log (or is it neighbor ip)
-    # )
-    
-    # origin = BGPPathAttr(
-    #     type_code=1,
-    #     attribute=0
-    # )
-
-    # # advertisement
-    # nlri = BGPNLRI(
-    #     prefix=config_dict["nlri"]
-    # )
-
-
-
-
-
-
-
     as_path = BGPPathAttr(
         type_flags=0x40,
         type_code=2,
@@ -114,7 +84,7 @@ def send_UPDATE(conn):
     next_hop = BGPPathAttr(
         type_flags=0x40,
         type_code=3,
-        attribute=BGPPANextHop(next_hop=config_dict['neighbor_ip'])
+        attribute=BGPPANextHop(next_hop=config_dict['bgp_id'])
     )
 
     origin = BGPPathAttr(
@@ -124,20 +94,6 @@ def send_UPDATE(conn):
     )
 
     nlri = BGPNLRI_IPv4(prefix=config_dict["nlri"])  # must include /mask
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     update_msg = BGPUpdate(
         withdrawn_routes=[],
@@ -150,11 +106,12 @@ def send_UPDATE(conn):
 
     try:
         print("[*] Attempting to send UPDATE BGP...")
+        print(raw(pkt).hex())
         conn.send(pkt)
-        handle_log(f"UPDATE send to {config_dict['neighbor_ip']}")
+        handle_log(f"UPDATE send to {config_dict['bgp_id']}")
         print("[+] UPDATE BGP sent")
     except Exception as e:
-        print("[-] Something went wrong:", e)
+        print("[-] Something went wrong UPDATE:", e)
         return None
 
     return None

@@ -55,12 +55,12 @@ def validate_config(key, value, config):
 
         return True, value, ""
 
-    if key in ["bgp_id", "neighbor_ip"]:
+    if key in ["port", "neighbor_port"]:
         if not is_valid_int_range(value, 1, 65535):
             return False, value, "Port must be between 1 and 65535."
         return True, value, ""
 
-    if key == "neighbor_ip":
+    if  key in ["bgp_id", "neighbor_ip"]:
         if not is_valid_ipv4(value):
             return False, value, f"{key} must be a valid IPv4 address."
         return True, value, ""

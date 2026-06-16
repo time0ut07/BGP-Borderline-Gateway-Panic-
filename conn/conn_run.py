@@ -17,7 +17,7 @@ def conn_run(mode, connection=None):
 
         return connection
 
-    elif mode == "UPDATE":
+    elif mode == "UPDATE": 
 
         if connection is None:
             print("[-] No active connection...")

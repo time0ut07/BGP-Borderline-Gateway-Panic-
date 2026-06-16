@@ -56,13 +56,13 @@ def conn_OPEN():
         connection.send(pkt)
         handle_log(f"OPEN packet sent to {config_dict['neighbor_ip']}")
         print("[+] OPEN BGP sent")
-        
+
         print("[*] Waiting for target response...")
         open_response = connection.recv()
         parse_open_BGP(open_response)
         handle_log(f"OPEN packet received from {config_dict["neighbor_ip"]}")
         print("[+] Open response received!")
-        connectivity()
+        #connectivity()
 
     except Exception as e:
         print("[-] Something went wrong:", e)
