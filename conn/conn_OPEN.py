@@ -4,9 +4,9 @@
 
 from scapy.contrib.bgp import BGPHeader, BGPOpen
 from conn.conn_socket import SocketConn
-from misc.grab_settings import get_config
-from misc.print_table import print_settings_table
-from conn.parse_BGP import parse_open_BGP
+from misc.grab_config import get_config
+from misc.print_table import print_config_table
+from conn.parse_BGP import parse_open_BGP, connectivity
 from misc.logging import handle_log
 
 
@@ -14,7 +14,7 @@ def conn_OPEN():
 
     config_dict = get_config(["version", "asn", "hold_time", "bgp_id", "neighbor_ip", "neighbor_port"])
 
-    print_settings_table(config_dict)
+    print_config_table(config_dict)
 
     while True:
         send = (input("\n[*] Send BGP OPEN Packet (y/n): ")).lower()
@@ -41,25 +41,31 @@ def conn_OPEN():
 
     try:
         print("[*] Attempting 3 way handshake...")
-        connection = SocketConn(config_dict["neighbor_ip"], int(config_dict["neighbor_port"]))
+        connection = SocketConn(
+            config_dict["neighbor_ip"], 
+            int(config_dict["neighbor_port"])
+        )
         print("[+] TCP connection Established")
-    except:
-        print("[-] Something went wrong")
+
+    except Exception as e:
+        print("[-] Something went wrong:", e)
         return None
 
     try:
         print("[*] Attempting to send OPEN BGP...")
         connection.send(pkt)
-        handle_log(f"OPEN packet sent to {config_dict["neighbor_ip"]}")
+        handle_log(f"OPEN packet sent to {config_dict['neighbor_ip']}")
         print("[+] OPEN BGP sent")
-
+        
         print("[*] Waiting for target response...")
-        response = connection.recv()
-        parse_open_BGP(response)
+        open_response = connection.recv()
+        parse_open_BGP(open_response)
         handle_log(f"OPEN packet received from {config_dict["neighbor_ip"]}")
-        print("[+] Response received!")
-    except:
-        print("[-] Something went wrong!!")
+        print("[+] Open response received!")
+        connectivity()
+
+    except Exception as e:
+        print("[-] Something went wrong:", e)
         return None
     
     return connection

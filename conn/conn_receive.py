@@ -2,6 +2,7 @@ import threading
 from conn.conn_socket import SocketConn
 from scapy.contrib.bgp import BGPHeader
 from conn.conn_handle import handle_keepalive, handle_notification, handle_update
+from conn.parse_BGP import connectivity
 
 
 def run_receiver(conn):
@@ -23,18 +24,32 @@ def run_receiver(conn):
 
 def receive_BGP(conn):
     while True:
-        response = conn.recv()
 
-        if not response:
+        try:
+            response = conn.recv()
+
+            if not response:
+                break
+
+            bgp = BGPHeader(response)
+
+            if bgp.type == 2:
+                handle_update(bgp)
+
+            elif bgp.type == 4:
+                handle_keepalive(bgp)
+
+            elif bgp.type == 3:
+                handle_notification(bgp)
+
+        except ConnectionAbortedError as e:
+            print(f"[x] Connection aborted: {e}")
             break
 
-        bgp = BGPHeader(response)
+        except ConnectionResetError as e:
+            print(f"[x] Connection reset: {e}")
+            break
 
-        if bgp.type == 2:
-            handle_update(bgp)
-
-        elif bgp.type == 4:
-            handle_keepalive(bgp)
-
-        elif bgp.type == 3:
-            handle_notification(bgp)
+        except Exception as e:
+            print(f"[x] Unexpected receive error: {e}")
+            break

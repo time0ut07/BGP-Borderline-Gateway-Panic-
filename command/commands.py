@@ -4,8 +4,11 @@ from typing import Callable
 from command.cmd_help import show_help
 from command.cmd_exit import exit_app
 from conn.conn_run import conn_run
-from command.cmd_setting import cmd_change_setting, cmd_view_setting
+from command.cmd_config import cmd_change_config, cmd_view_config
 from command.cmd_clear_log import clear_all_logs
+from conn.parse_BGP import get_connectivity
+
+# ACTIVE_CONNECTION = None
 
 
 @dataclass
@@ -24,11 +27,11 @@ def call_exit(args=None):
     exit_app()
 
 def connection_open(args=None):
+    #global ACTIVE_CONNECTION
     conn_run("OPEN")
 
-
 def connection_update(args=None):
-    conn_run("UPDATE")
+    conn_run("UPDATE", get_connectivity)
 
 
 def blackhole(args=None):
@@ -38,12 +41,11 @@ def blackhole(args=None):
 def sniff(args=None):
     print("[+] Sniffing network traffic")
 
-def change_setting(args):
-    cmd_change_setting(args)
+def change_config(args):
+    cmd_change_config(args)
 
-
-def view_setting(args=None):
-    cmd_view_setting()
+def view_config(args=None):
+    cmd_view_config()
 
 def clear_logs(args=None):
     clear_all_logs()
@@ -95,20 +97,20 @@ COMMANDS = {
         },
     ),
 
-    "setting": Command(
-        name="setting",
-        description="Modify configuration settings before connection/post-exploit",
+    "config": Command(
+        name="config",
+        description="Modify configuration configs before connection/post-exploit",
         subcommands={
             "change": Command(
                 name="change",
-                description="Change a settings",
-                handler=change_setting,
+                description="Change a configuration",
+                handler=change_config,
             ),
 
             "view": Command(
                 name="view",
-                description="View all settings",
-                handler=view_setting,
+                description="View all configs",
+                handler=view_config,
             ),
         },
     ),

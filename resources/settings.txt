@@ -1,9 +1,0 @@
-version=4
-port=179
-protocol=tcp
-asn=65002
-hold_time=30
-bgp_id=192.168.28.1
-neighbor_ip=192.168.28.136
-neighbor_asn=65002
-neighbor_port=179

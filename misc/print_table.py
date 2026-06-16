@@ -1,7 +1,7 @@
 from tabulate import tabulate
 
 
-def print_settings_table(settings: dict, *keys) -> None:
+def print_config_table(settings: dict, *keys) -> None:
     """
     Print out key value with tabulate
     """

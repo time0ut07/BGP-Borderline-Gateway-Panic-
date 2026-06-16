@@ -1,6 +1,10 @@
 from misc.logging import handle_log
-from misc.grab_settings import get_config
-from conn.parse_BGP import parse_update_BGP
+from misc.grab_config import get_config
+from conn.parse_BGP import parse_update_BGP, connectivity
+from scapy.contrib.bgp import *
+
+
+ip = get_config(["neighbor_ip"])["neighbor_ip"]
 
 
 def handle_keepalive(bgp):
@@ -8,14 +12,20 @@ def handle_keepalive(bgp):
     Just logs keep alive
     """
 
-    ip = get_config(["neighbor_ip"])["neighbor_ip"]
     handle_log(f"KEEPALIVE received from {ip}")
 
     return 0
 
 
 def handle_notification(bgp):
-    pass
+    
+    msg = bgp[BGPNotification]
+
+    # look at all error code and print somwthing for each
+    print(msg.error_code, msg.error_subcode)
+    print("HANDLE NOTIF")
+    connectivity()
+    handle_log(f"NOTIFICATION received from {ip}")
 
 
 # withdrawn routes (routes that are removed) - remove from routing table

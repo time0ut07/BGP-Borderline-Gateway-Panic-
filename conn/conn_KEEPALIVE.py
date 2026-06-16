@@ -1,8 +1,9 @@
 from scapy.contrib.bgp import BGPHeader
 import threading
 import time
-from misc.grab_settings import get_config
+from misc.grab_config import get_config
 from misc.logging import handle_log
+from conn.parse_BGP import get_connectivity
 
 
 def run_KEEPALIVE(conn):
@@ -36,6 +37,7 @@ def run_KEEPALIVE(conn):
 
 
 def conn_KEEPALIVE(conn, interval):
+
     keepalive_pkt = BGPHeader(type=4)
     ip = get_config(["neighbor_ip"])["neighbor_ip"]
 

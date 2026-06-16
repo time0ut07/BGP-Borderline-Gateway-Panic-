@@ -1,4 +1,4 @@
-from misc.grab_settings import get_config
+from misc.grab_config import get_config
 from misc.timestamp import timestamp
 
 def handle_log(msg:str) -> int:

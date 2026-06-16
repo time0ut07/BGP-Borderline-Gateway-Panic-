@@ -1,6 +1,10 @@
-from scapy.contrib.bgp import BGPHeader, BGPUpdate
+from scapy.contrib.bgp import BGPHeader, BGPUpdate, BGPPathAttr, BGPPAASPath, BGPPANextHop, BGPPAOrigin, BGPNLRI_IPv4
 from scapy.all import *
 import threading
+
+from misc.grab_config import get_config
+from misc.print_table import print_config_table
+from misc.logging import handle_log
 
 
 def receive_UPDATE(conn):
@@ -49,5 +53,108 @@ def thread_UPDATE():
     return 0
 
 
-def send_update(conn):
+def send_UPDATE(conn):
+
+    config_dict = get_config(['asn', 'neighbor_ip', 'nlri'])
+
+    print_config_table(config_dict)
+
+    while True:
+        send = (input("\n[*] Send BGP OPEN Packet (y/n): ")).lower()
+
+        match send:
+            case 'y':
+                break
+            case 'n':
+                print("[x] Cancelling operation...\n")
+                return None
+            case _:
+                print("[x] Invalid option")
+                continue
+
+    # as_path = BGPPathAttr(
+    #     type_flags=0x40,
+    #     type_code=2,
+    #     attribute=BGPPAASPath(
+    #         segments=[
+    #             (2, [config_dict["asn"]])
+    #         ]
+    #     )
+    # )
+
+    # next_hop = BGPPathAttr(
+    #     type_code=3,
+    #     attribute=str(config_dict["neighbor_ip"]) # in profile.log (or is it neighbor ip)
+    # )
     
+    # origin = BGPPathAttr(
+    #     type_code=1,
+    #     attribute=0
+    # )
+
+    # # advertisement
+    # nlri = BGPNLRI(
+    #     prefix=config_dict["nlri"]
+    # )
+
+
+
+
+
+
+
+    as_path = BGPPathAttr(
+        type_flags=0x40,
+        type_code=2,
+        attribute=BGPPAASPath(segments=[
+            BGPPAASPath.ASPathSegment(segment_type=2, segment_value=[int(config_dict["asn"])])
+        ])
+    )
+
+    next_hop = BGPPathAttr(
+        type_flags=0x40,
+        type_code=3,
+        attribute=BGPPANextHop(next_hop=config_dict['neighbor_ip'])
+    )
+
+    origin = BGPPathAttr(
+        type_flags=0x40,
+        type_code=1,
+        attribute=BGPPAOrigin(origin=0)
+    )
+
+    nlri = BGPNLRI_IPv4(prefix=config_dict["nlri"])  # must include /mask
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    update_msg = BGPUpdate(
+        withdrawn_routes=[],
+        path_attr=[as_path, next_hop, origin],
+        nlri=[nlri]
+    )
+
+    pkt = BGPHeader(type=2) / update_msg
+    print("[+] BGP UPDATE packet built")
+
+    try:
+        print("[*] Attempting to send UPDATE BGP...")
+        conn.send(pkt)
+        handle_log(f"UPDATE send to {config_dict['neighbor_ip']}")
+        print("[+] UPDATE BGP sent")
+    except Exception as e:
+        print("[-] Something went wrong:", e)
+        return None
+
+    return None

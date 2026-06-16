@@ -1,22 +1,30 @@
 from conn.conn_OPEN import conn_OPEN
 from conn.conn_KEEPALIVE import conn_KEEPALIVE, run_KEEPALIVE
+from conn.conn_UPDATE import send_UPDATE
 from conn.conn_receive import run_receiver
+from conn.parse_BGP import get_connectivity
 
 
-def conn_run(mode):
+def conn_run(mode, connection=None):
 
     if mode == "OPEN":
-        connOpen = conn_OPEN()
+        connection = conn_OPEN()
 
-        if connOpen is not None:
+        if connection is not None:
 
-            run_KEEPALIVE(connOpen)
-            run_receiver(connOpen)
+            run_KEEPALIVE(connection)
+            run_receiver(connection)
 
-        return connOpen
+        return connection
 
     elif mode == "UPDATE":
-        print("UPDATEEEEEEEE ME")
-        return None
 
-    return None
+        if connection is None:
+            print("[-] No active connection...")
+            return None
+
+        send_UPDATE(connection)
+
+        return connection
+
+    return connection

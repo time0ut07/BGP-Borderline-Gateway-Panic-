@@ -36,7 +36,7 @@ def main_menu():
                     print("[x] Command has no action")
                 continue
 
-            # User typed: connection / setting
+            # User typed: connection / config
             if len(parts) < 2:
                 print(f"\n{cmd.name} commands:")
 
@@ -59,9 +59,9 @@ def main_menu():
 
             args = parts[2:]
 
-            # Only allow args for: setting change
+            # Only allow args for: config change
             if args and not (
-                parts[0] == "setting"
+                parts[0] == "config"
                 and parts[1] == "change"
             ):
                 print("[x] This command does not accept arguments")

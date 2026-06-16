@@ -1,11 +1,11 @@
 def get_config(config_list:list = None) -> dict:
     """
-    Get settings value from resources/settings.txt
+    Get configuration value from resources/config.txt
     """
     
     config_dict = {}
 
-    with open("./resources/settings.txt", 'r') as f:
+    with open("./resources/config.txt", 'r') as f:
         for line in f:
             line = line.strip()
 

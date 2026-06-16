@@ -19,6 +19,9 @@ import socket
 
 
 def main():
+
+    with open('./resources/profile.log', 'w') as f:
+        pass
     
     print("\nWelcome to BGP Tool Name\n[help] to see existing commands\n[exit | quit] to exit")
     while True:

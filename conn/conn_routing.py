@@ -5,7 +5,6 @@ def update_route(update_msg) -> None:
     """
     Maintains simple BGP-like routing table based on BGP UPDATE
     """
-    print("hello")
     route_table = {}
 
     try:
