@@ -6,43 +6,6 @@ from conn.conn_routing import update_route
 PROFILE_FILE = "./resources/profile.log"
 
 
-def connectivity():
-    
-    with open(PROFILE_FILE, "r") as f:
-        lines = f.readlines()
-
-    key = "Connectivity:"
-    found = False
-    new_lines = []
-
-    for line in lines:
-        if line.startswith(key):
-            found = True
-            value = line.split(":")[1].strip().lower()
-            toggled = "False" if value == "true" else "True"
-            new_lines.append(f"{key} {toggled}\n")
-        else:
-            new_lines.append(line)
-
-    if not found:
-        new_lines.append(f"{key} True\n")
-
-    with open(PROFILE_FILE, "w") as f:
-        f.writelines(new_lines)
-
-
-def get_connectivity():
-
-    with open(PROFILE_FILE, "r") as f:
-        for line in f:
-            if line.startswith("Connectivity:"):
-                value = line.split(":")[1].strip().lower()
-                if value == 'true':
-                    return True
-
-    return False
-
-
 def parse_open_BGP(data: bytes) -> int:
 
     pkt = BGP(data)

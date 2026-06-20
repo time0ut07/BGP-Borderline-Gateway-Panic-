@@ -2,7 +2,6 @@ import threading
 from conn.conn_socket import SocketConn
 from scapy.contrib.bgp import BGPHeader
 from conn.conn_handle import handle_open, handle_keepalive, handle_notification, handle_update
-from conn.parse_BGP import connectivity
 
 
 def get_open_bgp(conn):

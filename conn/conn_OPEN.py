@@ -1,8 +1,10 @@
-from scapy.contrib.bgp import BGPHeader, BGPOpen
+from scapy.contrib.bgp import (BGPHeader, BGPOpen, BGPOptParam, 
+                                BGPCapability, BGPCapMultiprotocol, 
+                                BGPCapFourBytesASN)
 from conn.conn_socket import SocketConn
 from misc.grab_config import get_config
 from misc.print_table import print_config_table
-from conn.parse_BGP import parse_open_BGP, connectivity
+from conn.parse_BGP import parse_open_BGP
 from misc.logging import handle_log
 from conn.conn_receive import get_open_bgp
 
@@ -30,7 +32,38 @@ def conn_OPEN():
         version=int(config_dict["version"]),
         my_as=int(config_dict["asn"]),
         hold_time=int(config_dict["hold_time"]),
-        bgp_id=str(config_dict["bgp_id"])
+        bgp_id=str(config_dict["bgp_id"]),
+        opt_params=[
+            # 1. Multiprotocol Extension
+            BGPOptParam(
+                param_type=2,
+                param_value=BGPCapMultiprotocol(afi=1, safi=1)
+            ),
+
+            # 2. Route Refresh Cisco (code 128)
+            BGPOptParam(
+                param_type=2,
+                param_value=BGPCapability(code=128)
+            ),
+
+            # 3. Route Refresh standard (code 2)
+            BGPOptParam(
+                param_type=2,
+                param_value=BGPCapability(code=2)
+            ),
+
+            # 4. Enhanced Route Refresh (code 70)
+            BGPOptParam(
+                param_type=2,
+                param_value=BGPCapability(code=70)
+            ),
+
+            # 5. 4-octet ASN support
+            BGPOptParam(
+                param_type=2,
+                param_value=BGPCapFourBytesASN(asn=int(config_dict["asn"]))
+            )
+        ]
     )
 
     pkt = BGPHeader(type=1) / open_msg

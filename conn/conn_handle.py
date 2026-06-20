@@ -1,6 +1,6 @@
 from misc.logging import handle_log
 from misc.grab_config import get_config
-from conn.parse_BGP import parse_update_BGP, connectivity
+from conn.parse_BGP import parse_update_BGP
 from scapy.contrib.bgp import *
 from misc.status import change_status
 from conn.conn_decoding import decode_bgp_notification
@@ -97,7 +97,7 @@ def handle_update(bgp):
     update_msg = bgp.payload
 
     # Load existing RIB
-    if os.path.exists(RIB_FILE):
+    if os.path.exists(RIB_FILE) and os.path.getsize(RIB_FILE) > 0:
         with open(RIB_FILE, "r") as f:
             rib = json.load(f)
     else:

@@ -6,6 +6,8 @@ from misc.logging import handle_log
 from misc.status import get_status, change_status
 from scapy.all import AsyncSniffer
 
+sniffer = None
+
 
 def receive_sniffer(pkt):
 
@@ -54,64 +56,45 @@ def receive_sniffer(pkt):
 
 def run_sniffer(toggle):
     """
-    Starts/stops the Scapy sniffer
+    Starts/stops Scapy sniffer using AsyncSniffer
     """
-
     global sniffer
 
     if get_status('bgp_connection') is not True:
         print("[x] Establish a BGP connection first")
         return None
 
-    #
-    # Enable sniffing
-    #
+    # TOGGLE ON
     if toggle is True:
-
         if get_status('sniff') is True:
             print("[*] Sniffing is enabled already")
-            return
+            return sniffer
 
         change_status('sniff', 1)
 
-        try:
-            sniffer = AsyncSniffer(
-                iface=get_config(['iface'])['iface'],
-                prn=receive_sniffer,
-                store=False,
-                filter="ip or arp",
-                promisc=True
-            )
+        sniffer = AsyncSniffer(
+            iface=get_config(['iface'])['iface'],
+            prn=receive_sniffer,
+            store=False,
+            filter="ip or arp",
+            promisc=True
+        )
+        sniffer.start()
+        print("[+] Sniffing started")
 
-            sniffer.start()
+        return sniffer
 
-            print(
-                f"[+] Sniffing enabled on "
-                f"{get_config(['iface'])['iface']}"
-            )
-
-        except Exception as e:
-            change_status('sniff', 0)
-            print("[x] Failed to start sniffer:", e)
-
-    #
-    # Disable sniffing
-    #
+    # TOGGLE OFF
     else:
-
         if get_status('sniff') is False:
             print("[*] Sniffing is disabled already")
-            return
+            return None
 
         change_status('sniff', 0)
 
-        try:
+        if sniffer is not None:
+            sniffer.stop()
+            sniffer = None
+            print("[-] Sniffing stopped")
 
-            if sniffer is not None:
-                sniffer.stop()
-                sniffer = None
-
-            print("[+] Sniffing disabled")
-
-        except Exception as e:
-            print("[x] Failed to stop sniffer:", e)
+        return None

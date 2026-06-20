@@ -7,6 +7,7 @@ from conn.conn_run import conn_run
 from command.cmd_config import cmd_change_config, cmd_view_config
 from command.cmd_clear_log import clear_all_logs
 from pe.pe_sniffer import run_sniffer
+from pe.sslstrip import start_sslstrip
 
 ACTIVE_CONNECTION = None
 
@@ -51,6 +52,9 @@ def sniff(args=None):
 
     else:
         print("[x] Invalid option. Use: on or off")
+
+def sslstrip(args=None):
+    start_sslstrip()
 
 def change_config(args):
     cmd_change_config(args)
@@ -107,6 +111,11 @@ COMMANDS = {
                 name="sniff",
                 description="Sniff network traffic",
                 handler=sniff,
+            ),
+            "sslstrip": Command(
+                name="sslstrip",
+                description="SSLstrip proxy — downgrades HTTPS and captures credentials",
+                handler=sslstrip,
             ),
         },
     ),

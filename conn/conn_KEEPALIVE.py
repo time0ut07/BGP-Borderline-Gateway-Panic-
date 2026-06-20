@@ -3,7 +3,6 @@ import threading
 import time
 from misc.grab_config import get_config
 from misc.logging import handle_log
-from conn.parse_BGP import get_connectivity
 from misc.status import get_status
 
 

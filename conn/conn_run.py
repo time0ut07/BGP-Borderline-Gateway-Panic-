@@ -2,7 +2,6 @@ from conn.conn_OPEN import conn_OPEN
 from conn.conn_KEEPALIVE import conn_KEEPALIVE, run_KEEPALIVE
 from conn.conn_UPDATE import send_UPDATE
 from conn.conn_receive import run_receiver
-from conn.parse_BGP import get_connectivity
 from pe.pe_sniffer import run_sniffer
 from misc.status import get_status, change_status
 
