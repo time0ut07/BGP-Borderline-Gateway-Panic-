@@ -1,8 +1,23 @@
 import threading
 from conn.conn_socket import SocketConn
 from scapy.contrib.bgp import BGPHeader
-from conn.conn_handle import handle_keepalive, handle_notification, handle_update
+from conn.conn_handle import handle_open, handle_keepalive, handle_notification, handle_update
 from conn.parse_BGP import connectivity
+
+
+def get_open_bgp(conn):
+    """
+    Used for getting the first OPEN msg from client to confirm connectivity.
+    """
+    response = conn.recv()
+
+    if not response:
+        return None
+
+    bgp = BGPHeader(response)
+    handle_open(bgp)
+    
+    return response
 
 
 def run_receiver(conn):
@@ -33,23 +48,26 @@ def receive_BGP(conn):
 
             bgp = BGPHeader(response)
 
-            if bgp.type == 2:
-                handle_update(bgp)
-
-            elif bgp.type == 4:
-                handle_keepalive(bgp)
-
-            elif bgp.type == 3:
-                handle_notification(bgp)
+            match bgp.type:
+                case 1:
+                    handle_open(bgp)
+                case 2:
+                    handle_update(bgp)
+                case 3:
+                    handle_notification(bgp)
+                case 4:
+                    handle_keepalive(bgp)
+                case _:
+                    print(f"\n[x] Received unknown bgp packet type")
 
         except ConnectionAbortedError as e:
-            print(f"[x] Connection aborted: {e}")
+            print(f"\n[x] Connection aborted: {e}")
             break
 
         except ConnectionResetError as e:
-            print(f"[x] Connection reset: {e}")
+            print(f"\n[x] Connection reset: {e}")
             break
 
         except Exception as e:
-            print(f"[x] Unexpected receive error: {e}")
+            print(f"\n[x] Unexpected receive error: {e}")
             break

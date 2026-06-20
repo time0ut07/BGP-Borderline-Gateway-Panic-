@@ -10,7 +10,6 @@ from misc.logging import handle_log
 def receive_UPDATE(conn):
     while True:
         data = conn.recv(4096)
-        print(data)
 
         if not data:
             break
@@ -108,7 +107,7 @@ def send_UPDATE(conn):
         print("[*] Attempting to send UPDATE BGP...")
         print(raw(pkt).hex())
         conn.send(pkt)
-        handle_log(f"UPDATE send to {config_dict['bgp_id']}")
+        handle_log(f"UPDATE send to {config_dict['bgp_id']}", "bgp.log")
         print("[+] UPDATE BGP sent")
     except Exception as e:
         print("[-] Something went wrong UPDATE:", e)

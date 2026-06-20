@@ -1,13 +1,10 @@
-# find if bgp port 179 is open?
-# open from peer
-# keepalive exchange (multithread?) to mainatin sess
-
 from scapy.contrib.bgp import BGPHeader, BGPOpen
 from conn.conn_socket import SocketConn
 from misc.grab_config import get_config
 from misc.print_table import print_config_table
 from conn.parse_BGP import parse_open_BGP, connectivity
 from misc.logging import handle_log
+from conn.conn_receive import get_open_bgp
 
 
 def conn_OPEN():
@@ -54,13 +51,14 @@ def conn_OPEN():
     try:
         print("[*] Attempting to send OPEN BGP...")
         connection.send(pkt)
-        handle_log(f"OPEN packet sent to {config_dict['neighbor_ip']}")
+        handle_log(f"OPEN packet sent to {config_dict['neighbor_ip']}", "bgp.log")
         print("[+] OPEN BGP sent")
 
         print("[*] Waiting for target response...")
-        open_response = connection.recv()
+        open_response = get_open_bgp(connection)
         parse_open_BGP(open_response)
-        handle_log(f"OPEN packet received from {config_dict["neighbor_ip"]}")
+
+        handle_log(f"OPEN packet received from {config_dict["neighbor_ip"]}", "bgp.log")
         print("[+] Open response received!")
         #connectivity()
 

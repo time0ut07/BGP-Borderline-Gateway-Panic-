@@ -63,6 +63,9 @@ def main_menu():
             if args and not (
                 parts[0] == "config"
                 and parts[1] == "change"
+                or
+                parts[0] == "post-exploit"
+                and parts[1] == "sniff"
             ):
                 print("[x] This command does not accept arguments")
                 continue

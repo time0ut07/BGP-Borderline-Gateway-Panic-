@@ -1,1 +1,0 @@
-BGPNLRI_IPv4|NH:None|AS_PATH:None

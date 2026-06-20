@@ -6,6 +6,7 @@ from command.cmd_exit import exit_app
 from conn.conn_run import conn_run
 from command.cmd_config import cmd_change_config, cmd_view_config
 from command.cmd_clear_log import clear_all_logs
+from pe.pe_sniffer import run_sniffer
 
 ACTIVE_CONNECTION = None
 
@@ -38,7 +39,18 @@ def blackhole(args=None):
 
 
 def sniff(args=None):
-    print("[+] Sniffing network traffic")
+    if not args:
+        print("[x] Usage: post-exploit sniff on|off")
+        return
+    
+    if args[0] == "on":
+        run_sniffer(True)
+
+    elif args[0] == "off":
+        run_sniffer(False)
+
+    else:
+        print("[x] Invalid option. Use: on or off")
 
 def change_config(args):
     cmd_change_config(args)
@@ -46,8 +58,11 @@ def change_config(args):
 def view_config(args=None):
     cmd_view_config()
 
-def clear_logs(args=None):
-    clear_all_logs()
+def clear_bgp_logs(args=None):
+    clear_all_logs('bgp.log')
+
+def clear_traffic_logs(args=None):
+    clear_all_logs('traffic.log')
 
 
 # =====================================================
@@ -102,7 +117,7 @@ COMMANDS = {
         subcommands={
             "change": Command(
                 name="change",
-                description="Change a configurati",
+                description="Change a configuration",
                 handler=change_config,
             ),
 
@@ -118,11 +133,17 @@ COMMANDS = {
         name="clear",
         description="Clear specified file",
         subcommands={
-            "logs": Command(
-                name="logs",
-                description="Clear log file located in ./resources/logs.txt",
-                handler=clear_logs,
+            "bgp": Command(
+                name="bgp",
+                description="Clear bgp log file located in ./resources/bgp.log",
+                handler=clear_bgp_logs,
             ),
+            
+            "traffic": Command(
+                name="traffic",
+                description="Clear traffic log file located in ./resources/traffic.log",
+                handler=clear_traffic_logs,
+            )
         },
     ),
 

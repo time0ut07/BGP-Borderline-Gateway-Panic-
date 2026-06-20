@@ -4,6 +4,7 @@ import time
 from misc.grab_config import get_config
 from misc.logging import handle_log
 from conn.parse_BGP import get_connectivity
+from misc.status import get_status
 
 
 def run_KEEPALIVE(conn):
@@ -43,10 +44,16 @@ def conn_KEEPALIVE(conn, interval):
 
     while True:
         try:
-            conn.send(keepalive_pkt)
-            print("\n[+] KEEPALIVE sent\n")
-            handle_log(f"KEEPALIVE sent to {ip}")
-            time.sleep(interval)
+            
+            if get_status('bgp_connection') is True:
+                conn.send(keepalive_pkt)
+                print("\n[+] KEEPALIVE sent\n")
+                handle_log(f"KEEPALIVE sent to {ip}", "bgp.log")
+                time.sleep(interval)
+            else:
+                print("\n[x] BGP connection closed, stopping KEEPALIVE")
+                break
+            
         except Exception as e:
             print("\n[-] KEEPALIVE failed:", e)
             break

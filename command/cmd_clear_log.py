@@ -1,5 +1,5 @@
-def clear_all_logs():
-    with open('./resources/logs.txt', 'w') as f:
+def clear_all_logs(file:str):
+    with open(f'./resources/{file}', 'w') as f:
         pass
     
-    print("[+] Cleared logs")
+    print(f"[+] Cleared logs: ./resources/{file}")
