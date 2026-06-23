@@ -4,6 +4,7 @@ from conn.parse_BGP import parse_update_BGP
 from scapy.contrib.bgp import *
 from misc.status import change_status
 from conn.conn_decoding import decode_bgp_notification
+from conn.conn_update import send_empty_UPDATE
 import json
 import os
 
@@ -164,3 +165,8 @@ def handle_update(bgp):
     #
     with open(RIB_FILE, "w") as f:
         json.dump(rib, f, indent=4)
+
+
+def handle_route_refresh(bgp, conn):
+    handle_log(f"ROUTE REFRESH received from {ip}", "bgp.log")
+    send_empty_UPDATE(conn)

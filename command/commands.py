@@ -6,7 +6,7 @@ from command.cmd_exit import exit_app
 from conn.conn_run import conn_run
 from command.cmd_config import cmd_change_config, cmd_view_config, cmd_add_route
 from command.cmd_clear_log import clear_all_logs
-from pe.pe_sniffer import run_sniffer, monitor_routing
+from pe.pe_sniffer import run_sniffer, run_routing
 #from pe.sslstrip import start_sslstrip
 
 ACTIVE_CONNECTION = None
@@ -45,10 +45,10 @@ def route(args=None):
         return
     
     if args[0] == "on":
-        monitor_routing(True)
+        run_routing(True)
 
     elif args[0] == "off":
-        monitor_routing(False)
+        run_routing(False)
 
     else:
         print("[x] Invalid option. Use: on or off")

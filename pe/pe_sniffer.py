@@ -5,11 +5,21 @@ from misc.grab_config import get_config
 from misc.logging import handle_log
 from misc.status import get_status, change_status
 from scapy.all import AsyncSniffer
+from pe.pe_routing import get_routing_handler
 
 sniffer = None
+routing_handler = None
 
-def monitor_routing(toggle):
-    global sniffer, routing_thread
+def monitor_routing():
+    global routing_handler
+    routing_handler = get_routing_handler()
+    import time
+    while get_status('routing') is True:
+        print("YES")
+        time.sleep(2)
+
+def run_routing(toggle):
+    global routing_thread, routing_handler
 
     if get_status('bgp_connection') is not True:
         print("[x] Establish a BGP connection first")
@@ -26,12 +36,14 @@ def monitor_routing(toggle):
         
         change_status('routing', 1)
 
-        routing_thread = threading.Thread(
-            target=monitor_routing,
-            daemon=True
-        )
+        # routing_thread = threading.Thread(
+        #     target=monitor_routing,
+        #     daemon=True
+        # )
 
-        routing_thread.start()
+        # routing_thread.start()
+        monitor_routing()
+        print("[+] Routing started")
 
     else:
         if get_status('routing') is False:
@@ -40,10 +52,12 @@ def monitor_routing(toggle):
         
         change_status('routing', 0)
 
-        if routing_thread is not None:
-            routing_thread.join(timeout=2)
-            routing_thread = None
-            print("[-] Routing stopped")
+        # if routing_thread is not None:
+        #     routing_thread.join(timeout=2)
+        #     routing_thread = None
+        #     print("[-] Routing stopped")
+        routing_handler = None
+        print("[-] Routing stopped")
 
 
 def log_sniffer(pkt):
@@ -53,6 +67,8 @@ def log_sniffer(pkt):
         if pkt[TCP].sport == 179 or pkt[TCP].dport == 179:
             return
 
+    if get_status('routing') is True and routing_handler is not None:
+        routing_handler(pkt)
     log_msg = ""
 
     # Ethernet layer
@@ -138,9 +154,9 @@ def run_sniffer(toggle):
 
         change_status('sniff', 0)
 
-        if get_status('routing') is True:
-            print("[*] Stopping routing as sniffer is being disabled...")
-            monitor_routing(False)
+        # if get_status('routing') is True:
+        #     print("[*] Stopping routing as sniffer is being disabled...")
+        #     monitor_routing(False)
 
         if sniffer is not None:
             sniffer.stop()

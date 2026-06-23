@@ -105,7 +105,6 @@ def send_UPDATE(conn):
 
     try:
         print("[*] Attempting to send UPDATE BGP...")
-        print(raw(pkt).hex())
         conn.send(pkt)
         handle_log(f"UPDATE send to {config_dict['bgp_id']}", "bgp.log")
         print("[+] UPDATE BGP sent")
@@ -114,3 +113,14 @@ def send_UPDATE(conn):
         return None
 
     return None
+
+
+def send_empty_UPDATE(conn):
+
+    pkt = BGPHeader(type=2) / BGPUpdate(
+        withdrawn_routes=[],
+        path_attr=[],
+        nlri=[]
+    )
+
+    conn.send(pkt)

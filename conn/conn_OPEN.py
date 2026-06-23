@@ -34,31 +34,31 @@ def conn_OPEN():
         hold_time=int(config_dict["hold_time"]),
         bgp_id=str(config_dict["bgp_id"]),
         opt_params=[
-            # 1. Multiprotocol Extension
+            # Multiprotocol Extension
             BGPOptParam(
                 param_type=2,
                 param_value=BGPCapMultiprotocol(afi=1, safi=1)
             ),
 
-            # 2. Route Refresh Cisco (code 128)
+            # Route Refresh Cisco (code 128)
             BGPOptParam(
                 param_type=2,
                 param_value=BGPCapability(code=128)
             ),
 
-            # 3. Route Refresh standard (code 2)
+            # Route Refresh standard (code 2)
             BGPOptParam(
                 param_type=2,
                 param_value=BGPCapability(code=2)
             ),
 
-            # 4. Enhanced Route Refresh (code 70)
+            # Enhanced Route Refresh (code 70)
             BGPOptParam(
                 param_type=2,
                 param_value=BGPCapability(code=70)
             ),
 
-            # 5. 4-octet ASN support
+            # 4-octet ASN support
             BGPOptParam(
                 param_type=2,
                 param_value=BGPCapFourBytesASN(asn=int(config_dict["asn"]))
@@ -93,7 +93,6 @@ def conn_OPEN():
 
         handle_log(f"OPEN packet received from {config_dict["neighbor_ip"]}", "bgp.log")
         print("[+] Open response received!")
-        #connectivity()
 
     except Exception as e:
         print("[-] Something went wrong:", e)

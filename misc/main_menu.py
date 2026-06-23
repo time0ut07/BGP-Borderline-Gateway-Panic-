@@ -62,11 +62,11 @@ def main_menu():
             # Only allow args for: config change
             if args and not (
                 parts[0] == "config"
-                and parts[1] == "change"
+                and (parts[1] == "change" or parts[1] == "add-route")
                 or
                 parts[0] == "post-exploit"
-                and parts[1] == "sniff"
-            ):
+                and (parts[1] == "sniff" or parts[1] == "route")
+              ):
                 print("[x] This command does not accept arguments")
                 continue
 

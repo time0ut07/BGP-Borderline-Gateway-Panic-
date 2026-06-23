@@ -8,7 +8,7 @@ neighbor_ip=192.168.28.136
 neighbor_asn=65002
 neighbor_port=179
 nlri=203.113.10.0/24
-iface=VMware Network Adapter VMnet8
+iface=eth0
 
 
 ## to add

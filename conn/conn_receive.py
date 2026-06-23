@@ -1,7 +1,7 @@
 import threading
 from conn.conn_socket import SocketConn
 from scapy.contrib.bgp import BGPHeader
-from conn.conn_handle import handle_open, handle_keepalive, handle_notification, handle_update
+from conn.conn_handle import handle_open, handle_keepalive, handle_notification, handle_update, handle_route_refresh
 import re
 import binascii
 
@@ -44,6 +44,9 @@ def receive_BGP(conn):
         try:
             response = conn.recv()
 
+            if response is None:
+                continue
+
             if not response:
                 break
 
@@ -52,21 +55,20 @@ def receive_BGP(conn):
             seperate_bgp = ['ffffffffffffffffffffffffffffffff' + part for part in re.split(f'ffffffffffffffffffffffffffffffff', received_bytes) if part]
 
             for indiv_bgp_bytes in seperate_bgp:
-                indiv_bgp = bytes.fromhex(indiv_bgp_bytes)
-                bgp_type_code = BGPHeader(indiv_bgp).type
+                indiv_bgp = BGPHeader(bytes.fromhex(indiv_bgp_bytes))
+                bgp_type_code = indiv_bgp.type
 
                 match bgp_type_code:
                     case 1:
-                        handle_open(bgp)
+                        handle_open(indiv_bgp)
                     case 2:
-                        handle_update(bgp)
+                        handle_update(indiv_bgp)
                     case 3:
-                        handle_notification(bgp)
+                        handle_notification(indiv_bgp)
                     case 4:
-                        handle_keepalive(bgp)
+                        handle_keepalive(indiv_bgp)
                     case 5:
-                        pass
-                        #handle_route_refresh(bgp)
+                        handle_route_refresh(indiv_bgp, conn)
                     case _:
                         print(f"\n[x] Received unknown bgp packet type")
 
