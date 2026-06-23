@@ -1,2 +1,3 @@
 bgp_connection=0
 sniff=0
+routing=0

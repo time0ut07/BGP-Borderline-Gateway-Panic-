@@ -9,3 +9,8 @@ neighbor_asn=65002
 neighbor_port=179
 nlri=203.113.10.0/24
 iface=VMware Network Adapter VMnet8
+
+
+## to add
+route_dest_ip=xxx
+route_dest_mac=xxx

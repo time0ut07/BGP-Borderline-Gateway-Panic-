@@ -4,10 +4,10 @@ from typing import Callable
 from command.cmd_help import show_help
 from command.cmd_exit import exit_app
 from conn.conn_run import conn_run
-from command.cmd_config import cmd_change_config, cmd_view_config
+from command.cmd_config import cmd_change_config, cmd_view_config, cmd_add_route
 from command.cmd_clear_log import clear_all_logs
-from pe.pe_sniffer import run_sniffer
-from pe.sslstrip import start_sslstrip
+from pe.pe_sniffer import run_sniffer, monitor_routing
+#from pe.sslstrip import start_sslstrip
 
 ACTIVE_CONNECTION = None
 
@@ -38,6 +38,21 @@ def connection_update(args=None):
 def blackhole(args=None):
     print("[+] Running blackhole")
 
+# For testing oni 
+def route(args=None):
+    if not args:
+        print("[x] Usage: post-exploit route on|off")
+        return
+    
+    if args[0] == "on":
+        monitor_routing(True)
+
+    elif args[0] == "off":
+        monitor_routing(False)
+
+    else:
+        print("[x] Invalid option. Use: on or off")
+
 
 def sniff(args=None):
     if not args:
@@ -54,13 +69,17 @@ def sniff(args=None):
         print("[x] Invalid option. Use: on or off")
 
 def sslstrip(args=None):
-    start_sslstrip()
+    #start_sslstrip()
+    pass
 
 def change_config(args):
     cmd_change_config(args)
 
 def view_config(args=None):
     cmd_view_config()
+
+def add_route(args):
+    cmd_add_route(args)
 
 def clear_bgp_logs(args=None):
     clear_all_logs('bgp.log')
@@ -112,6 +131,11 @@ COMMANDS = {
                 description="Sniff network traffic",
                 handler=sniff,
             ),
+            "route": Command(
+                name="route",
+                description="Route network traffic",
+                handler=route,
+            ),
             "sslstrip": Command(
                 name="sslstrip",
                 description="SSLstrip proxy — downgrades HTTPS and captures credentials",
@@ -135,6 +159,11 @@ COMMANDS = {
                 description="View all configs",
                 handler=view_config,
             ),
+            "add-route": Command(
+            name="add-route",
+            description="Manually add a route to route.json",
+            handler=add_route,
+         ),
         },
     ),
 

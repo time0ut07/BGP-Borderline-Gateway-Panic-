@@ -1,4 +1,4 @@
-from scapy.all import sniff, IP, ICMP, TCP, UDP, ARP, Ether
+from scapy.all import sniff, IP, ICMP, TCP, UDP, ARP, Ether, AsyncSniffer, sendp, get_if_hwaddr
 import threading
 from misc.timestamp import timestamp
 from misc.grab_config import get_config
@@ -8,8 +8,45 @@ from scapy.all import AsyncSniffer
 
 sniffer = None
 
+def monitor_routing(toggle):
+    global sniffer, routing_thread
 
-def receive_sniffer(pkt):
+    if get_status('bgp_connection') is not True:
+        print("[x] Establish a BGP connection first")
+        return None
+    
+    if toggle is True:
+        if get_status('routing') is True:
+            print("[*] Routing is enabled already")
+            return None
+
+        if get_status('sniff') is not True:
+            print("[*] Sniffer not running, running it first")
+            run_sniffer(True)
+        
+        change_status('routing', 1)
+
+        routing_thread = threading.Thread(
+            target=monitor_routing,
+            daemon=True
+        )
+
+        routing_thread.start()
+
+    else:
+        if get_status('routing') is False:
+            print("[*] Routing is disabled already")
+            return None
+        
+        change_status('routing', 0)
+
+        if routing_thread is not None:
+            routing_thread.join(timeout=2)
+            routing_thread = None
+            print("[-] Routing stopped")
+
+
+def log_sniffer(pkt):
 
     # BLOCK BGP (TCP port 179)
     if TCP in pkt:
@@ -59,6 +96,7 @@ def run_sniffer(toggle):
     Starts/stops Scapy sniffer using AsyncSniffer
     """
     global sniffer
+    global routing_thread
 
     if get_status('bgp_connection') is not True:
         print("[x] Establish a BGP connection first")
@@ -74,12 +112,20 @@ def run_sniffer(toggle):
 
         sniffer = AsyncSniffer(
             iface=get_config(['iface'])['iface'],
-            prn=receive_sniffer,
+            prn=log_sniffer,
             store=False,
-            filter="ip or arp",
+            #filter="ip or arp",
             promisc=True
         )
         sniffer.start()
+        
+        # routing_thread = threading.Thread(
+        #     target=monitor_routing, 
+        #     daemon=True
+        # )
+
+        # routing_thread.start()
+
         print("[+] Sniffing started")
 
         return sniffer
@@ -91,6 +137,10 @@ def run_sniffer(toggle):
             return None
 
         change_status('sniff', 0)
+
+        if get_status('routing') is True:
+            print("[*] Stopping routing as sniffer is being disabled...")
+            monitor_routing(False)
 
         if sniffer is not None:
             sniffer.stop()

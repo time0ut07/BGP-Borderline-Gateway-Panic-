@@ -1,4 +1,5 @@
 import ipaddress
+import re 
 
 
 OPTIONAL_FIELDS = [
@@ -13,6 +14,15 @@ def is_valid_ipv4(value):
         return True
     except ValueError:
         return False
+
+
+def is_valid_mac(value):
+    pattern = r'^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$'
+    if not re.match(pattern, value):
+        return False
+    # if value.lower() == "ff:ff:ff:ff:ff:ff":
+    #     return False
+    return True
 
 
 def is_valid_int_range(value, minimum, maximum):
@@ -60,9 +70,14 @@ def validate_config(key, value, config):
             return False, value, "Port must be between 1 and 65535."
         return True, value, ""
 
-    if  key in ["bgp_id", "neighbor_ip"]:
+    if  key in ["bgp_id", "neighbor_ip","route_dest_ip"]:
         if not is_valid_ipv4(value):
             return False, value, f"{key} must be a valid IPv4 address."
         return True, value, ""
+        
+    if key == "route_dest_mac":
+        if not is_valid_mac(value):
+            return False, value, "route_dest_mac must be a valid MAC address (xx:xx:xx:xx:xx:ff) and cannot be broadcast."
+        return True, value.lower(), ""
 
     return True, value, ""
