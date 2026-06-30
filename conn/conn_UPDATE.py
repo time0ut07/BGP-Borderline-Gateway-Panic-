@@ -5,6 +5,7 @@ import threading
 from misc.grab_config import get_config
 from misc.print_table import print_config_table
 from misc.logging import handle_log
+from misc.bgp_utils import build_as_path_attr
 
 
 def receive_UPDATE(conn):
@@ -55,7 +56,7 @@ def thread_UPDATE():
 
 def send_UPDATE(conn):
 
-    config_dict = get_config(['asn', 'neighbor_ip', 'nlri', 'bgp_id'])
+    config_dict = get_config(['asn', 'neighbor_ip', 'nlri', 'bgp_id']) # target_dict??
 
     print_config_table(config_dict)
 
@@ -72,13 +73,16 @@ def send_UPDATE(conn):
                 print("[x] Invalid option")
                 continue
 
-    as_path = BGPPathAttr(
-        type_flags=0x40,
-        type_code=2,
-        attribute=BGPPAASPath(segments=[
-            BGPPAASPath.ASPathSegment(segment_type=2, segment_value=[int(config_dict["asn"])])
-        ])
-    )
+    peer_supports_four_byte_asn = getattr(conn, "peer_supports_four_byte_asn", False)
+
+    try:
+        as_path = build_as_path_attr(
+            int(config_dict["asn"]),
+            int(config_dict["target_asn"]),
+            peer_supports_four_byte_asn
+        )
+    except ValueError as e:
+        print(f"[-] Cannot build UPDATE: {e}")
 
     next_hop = BGPPathAttr(
         type_flags=0x40,

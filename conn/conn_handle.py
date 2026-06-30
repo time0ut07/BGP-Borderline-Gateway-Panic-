@@ -47,9 +47,12 @@ def handle_notification(bgp):
     change_status('bgp_connection', 0)
 
     error_msg = decode_bgp_notification(msg.error_code, msg.error_subcode)
-    print(f"[x] Notification received from {ip}")
-    handle_log(f"NOTIFICATION received from {ip}", "bgp.log")
-    handle_log(f"{error_msg}d", bgp.log)
+    notification_msg = (
+        f"NOTIFICATION received from {ip}: "
+        f"{error_msg} (code={msg.error_code}, subcode={msg.error_subcode})"
+    )
+    print(f"[x] {notification_msg}")
+    handle_log(notification_msg, "bgp.log")
 
 
 # withdrawn routes (routes that are removed) - remove from routing table

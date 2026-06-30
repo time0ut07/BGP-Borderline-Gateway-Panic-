@@ -7,6 +7,7 @@ from misc.print_table import print_config_table
 from conn.parse_BGP import parse_open_BGP
 from misc.logging import handle_log
 from conn.conn_receive import get_open_bgp
+from misc.bgp_utils import open_message_asn, peer_supports_four_byte_asn
 
 
 def conn_OPEN():
@@ -30,7 +31,7 @@ def conn_OPEN():
 
     open_msg = BGPOpen(
         version=int(config_dict["version"]),
-        my_as=int(config_dict["asn"]),
+        my_as=open_message_asn(int(config_dict["asn"])),
         hold_time=int(config_dict["hold_time"]),
         bgp_id=str(config_dict["bgp_id"]),
         opt_params=[
@@ -89,6 +90,7 @@ def conn_OPEN():
 
         print("[*] Waiting for target response...")
         open_response = get_open_bgp(connection)
+        connection.peer_supports_four_byte_asn = peer_supports_four_byte_asn(open_response)
         parse_open_BGP(open_response)
 
         handle_log(f"OPEN packet received from {config_dict["neighbor_ip"]}", "bgp.log")
