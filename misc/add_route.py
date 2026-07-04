@@ -3,9 +3,22 @@ import os
 import ipaddress
 
 RIB_FILE = "./resources/route.json"
+"""str: File path to the local Routing Information Base (RIB) database"""
 
 
-def add_route(params: dict):
+def add_route(params:dict) -> None:
+    """Validate and add a static route to the local Routing Information Base
+
+    Validates the required route parameters, parses optional BGP path
+    attributes, loads the existing RIB from disk, inserts or updates the
+    specified network prefix, and writes the modified routing table back to
+    persistent storage.
+
+    Args:
+        params (dict): Dictionary containing route configuration values. The
+            required keys are ``prefix`` and ``next_hop``. Optional keys
+            include ``as_path``, ``origin``, and ``med``.
+    """
 
     prefix = params.get("prefix")
     next_hop = params.get("next_hop")
@@ -72,3 +85,4 @@ def add_route(params: dict):
         json.dump(rib, f, indent=4)
 
     print(f"[+] Route added: {prefix} via {next_hop}")
+    

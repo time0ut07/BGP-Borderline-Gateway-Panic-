@@ -6,12 +6,16 @@ BGP_ERROR_CODES = {
     5: "Finite State Machine Error",
     6: "Cease"
 }
+"""dict[int, str]: Primary BGP notification error codes as defined by RFC 4271"""
+
 
 BGP_HEADER_SUBCODES = {
     1: "Connection Not Synchronized",
     2: "Bad Message Length",
     3: "Bad Message Type"
 }
+"""dict[int, str]: Specific error subcodes for Message Header errors (Code 1)"""
+
 
 BGP_OPEN_SUBCODES = {
     1: "Unsupported Version Number",
@@ -21,6 +25,8 @@ BGP_OPEN_SUBCODES = {
     5: "Authentication Failure",
     6: "Unacceptable Hold Time"
 }
+"""dict[int, str]: Specific error subcodes for OPEN session establishment messages (Code 2)"""
+
 
 BGP_UPDATE_SUBCODES = {
     1: "Malformed Attribute List",
@@ -35,6 +41,8 @@ BGP_UPDATE_SUBCODES = {
     10: "Invalid Network Field",
     11: "Malformed AS_PATH"
 }
+"""dict[int, str]: Specific error subcodes for UPDATE routing path announcement messages (Code 3)"""
+
 
 BGP_CEASE_SUBCODES = {
     1: "Maximum Number of Prefixes Reached",
@@ -46,8 +54,23 @@ BGP_CEASE_SUBCODES = {
     7: "Connection Collision Resolution",
     8: "Out of Resources"
 }
+"""dict[int, str]: Specific error subcodes for Cease notification termination events (Code 6)"""
+
 
 def decode_bgp_notification(code:int, subcode:int) -> str:
+    """Translate raw BGP notification error into a human-readable string
+
+    Parses the primary BGP error category and safety-fetches the explicit sub-error details
+    from the corresponding RFC specification maps
+
+    Args:
+        code (int): The primary BGP notification error code (1-6)
+        subcode (int): The specific error subcode refining the root cause context
+
+    Returns:
+        str: A descriptive error string. Returns a generic fallback message 
+             if either the primary code or the subcode is undocumented
+    """
 
     if code == 1:
         msg = BGP_HEADER_SUBCODES.get(subcode, "Unknown Header Error")
@@ -61,3 +84,4 @@ def decode_bgp_notification(code:int, subcode:int) -> str:
         msg = "Unknown BGP Error"
 
     return msg
+    

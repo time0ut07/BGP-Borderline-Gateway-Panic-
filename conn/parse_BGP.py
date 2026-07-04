@@ -1,12 +1,23 @@
 from datetime import datetime
 from scapy.contrib.bgp import BGP
+
 from conn.conn_routing import update_route
 
 
 PROFILE_FILE = "./resources/profile.log"
+"""str: File path used to store parsed BGP session and routing profile information"""
 
 
-def parse_open_BGP(data: bytes) -> int:
+def parse_open_BGP(data: bytes) -> None:
+    """Parse an incoming BGP OPEN message and record peer information
+
+    Decodes the raw BGP OPEN packet, extracts session negotiation parameters,
+    and appends the peer's capabilities and identifying information to the
+    local profile log.
+
+    Args:
+        data (bytes): Raw bytes containing a serialized BGP OPEN message.
+    """
 
     pkt = BGP(data)
 
@@ -20,10 +31,17 @@ def parse_open_BGP(data: bytes) -> int:
             f.write(f"Hold Time: {open_msg.hold_time}\n")
             f.write(f"Router ID: {open_msg.bgp_id}\n")
 
-    return 0
 
+def parse_update_BGP(bgp:BGP) -> None:
+    """Parse an incoming BGP UPDATE message and update local routing records
 
-def parse_update_BGP(bgp) -> int:
+    Extracts routing information from the UPDATE message, appends the packet
+    contents to the local profile log, and updates the local routing table
+    with newly advertised and withdrawn network prefixes.
+
+    Args:
+        bgp (BGP): A parsed Scapy BGP packet containing an UPDATE message.
+    """
 
     if bgp.type == 2:
 
@@ -37,5 +55,3 @@ def parse_update_BGP(bgp) -> int:
             f.write(f"NLRI: {update_msg.nlri}\n")
 
         update_route(update_msg)
-
-    return 0

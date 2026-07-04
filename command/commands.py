@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import Callable
 
 from command.cmd_help import show_help
 from command.cmd_exit import exit_app
@@ -7,13 +6,21 @@ from conn.conn_run import conn_run
 from command.cmd_config import cmd_change_config, cmd_view_config, cmd_add_route
 from command.cmd_clear_log import clear_all_logs
 from pe.pe_sniffer import run_sniffer, run_routing
-#from pe.sslstrip import start_sslstrip
 
 ACTIVE_CONNECTION = None
 
 
 @dataclass
 class Command:
+    """Data blueprint representing a CLI command & subcommand.
+
+    Attributes:
+        name (str): The unique keyword token used to trigger the command.
+        description (str): A brief summary of what the command executes.
+        handler (Callable | None): The callback function executed when called.
+        subcommands (dict[str, Command]): A mapping of nested subcommand keywords 
+    """
+
     name: str
     description: str
     handler: Callable | None = None
@@ -24,22 +31,35 @@ class Command:
 # Handlers
 # =====================================================
 
-def call_exit(args=None):
+def call_exit(args:list[str] | None = None) -> None:
+    """Wrapper function to invoke the main application graceful shutdown routine
+    """
+    
     exit_app()
 
-def connection_open(args=None):
+
+def connection_open(args:list[str] | None = None) -> None:
+    """Initialize and open an active BGP network connection session
+    """
+    
     global ACTIVE_CONNECTION
     ACTIVE_CONNECTION = conn_run("OPEN")
 
-def connection_update(args=None):
+
+def connection_update(args:list[str] | None = None) -> None:
+    """Send an update packet over the currently active BGP connection session
+    """
+
     conn_run("UPDATE", ACTIVE_CONNECTION)
 
 
-def blackhole(args=None):
-    print("[+] Running blackhole")
+def route(args:list[str] | None = None) -> None:
+    """Toggle background routing engine on or off.
 
-# For testing oni 
-def route(args=None):
+    Args:
+        args (list[str] | None): CLI positional arguments, expects ['on'] or ['off']
+    """
+
     if not args:
         print("[x] Usage: post-exploit route on|off")
         return
@@ -54,7 +74,13 @@ def route(args=None):
         print("[x] Invalid option. Use: on or off")
 
 
-def sniff(args=None):
+def sniff(args:list[str] | None = None) -> None:
+    """Toggle background raw packet sniffing
+
+    Args:
+        args (list[str] | None): CLI positional arguments. Expects ['on'] or ['off'].
+    """
+
     if not args:
         print("[x] Usage: post-exploit sniff on|off")
         return
@@ -67,24 +93,44 @@ def sniff(args=None):
 
     else:
         print("[x] Invalid option. Use: on or off")
+        
 
-def sslstrip(args=None):
-    #start_sslstrip()
-    pass
+def change_config(args:list[str] | None = None) -> None:
+    """Forward modification string pairs to configuration file
 
-def change_config(args):
+    Args:
+        args (list[str]): List of configuration target strings (e.g., ['key=value'])
+    """
+
     cmd_change_config(args)
 
-def view_config(args=None):
+
+def view_config(args:list[str] | None = None) -> None:
+    """Fetch and print the current live configuration list
+    """
+
     cmd_view_config()
 
-def add_route(args):
+
+def add_route(args:list[str] | None = None) -> None:
+    """Forward explicit parameter arrays to the routing table function
+
+    Args:
+        args (list[str]): Explicit prefix configuration strings
+    """
     cmd_add_route(args)
 
-def clear_bgp_logs(args=None):
+
+def clear_bgp_logs(args:list[str] | None = None) -> None:
+    """Truncate all text contents in './resources/bgp.log'
+    """
     clear_all_logs('bgp.log')
 
-def clear_traffic_logs(args=None):
+
+def clear_traffic_logs(args:list[str] | None = None) -> None:
+    """Truncate all text contents in './resources/traffic.log'
+    """
+
     clear_all_logs('traffic.log')
 
 
@@ -121,11 +167,6 @@ COMMANDS = {
         name="post-exploit",
         description="Post exploitation actions",
         subcommands={
-            "blackhole": Command(
-                name="blackhole",
-                description="Start blackhole attack",
-                handler=blackhole,
-            ),
             "sniff": Command(
                 name="sniff",
                 description="Sniff network traffic",
@@ -135,11 +176,6 @@ COMMANDS = {
                 name="route",
                 description="Route network traffic",
                 handler=route,
-            ),
-            "sslstrip": Command(
-                name="sslstrip",
-                description="SSLstrip proxy — downgrades HTTPS and captures credentials",
-                handler=sslstrip,
             ),
         },
     ),
@@ -159,11 +195,12 @@ COMMANDS = {
                 description="View all configs",
                 handler=view_config,
             ),
+
             "add-route": Command(
-            name="add-route",
-            description="Manually add a route to route.json",
-            handler=add_route,
-         ),
+                name="add-route",
+                description="Manually add a route to route.json",
+                handler=add_route,
+            ),
         },
     ),
 
@@ -184,5 +221,4 @@ COMMANDS = {
             )
         },
     ),
-
 }

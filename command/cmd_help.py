@@ -1,4 +1,13 @@
-def show_help(commands):
+def show_help(commands: dict) -> None:
+    """Print a structured help menu displaying all main commands and subcommands
+
+    Iterates through the provided command registry and prints the top-level description
+    alongside a strutured tabular view of associated subcommands
+
+    Args:
+        commands (dict): A dictionary mapping command names (str) to command objects
+    """
+
     print("\nAvailable Commands\n")
 
     for cmd_name, cmd in commands.items():

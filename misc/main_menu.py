@@ -5,13 +5,23 @@ from command.cmd_help import show_help
 
 
 def main_menu():
-    """
-    Command-based interface (fully driven by COMMANDS)
+    """Run the interactive BGP command-line interface
+
+    Implements a REPL-style command interpreter driven by the COMMANDS
+    registry. Supports hierarchical commands with optional subcommands and
+    argument validation for selected command groups.
+
+    Features:
+        - Top-level command parsing (e.g. config, connection, exit)
+        - Subcommand dispatch via COMMANDS structure
+        - Built-in help system
+        - Argument validation for restricted command types
+        - Graceful handling of invalid input and keyboard interrupts
     """
 
     while True:
         try:
-            raw = input("\nBGP >> ").strip()
+            raw = input("\nVORTEX >> ").strip()
 
             if not raw:
                 continue
@@ -77,3 +87,4 @@ def main_menu():
 
         except KeyboardInterrupt:
             print("\n[x] Use 'exit' command to quit")
+            

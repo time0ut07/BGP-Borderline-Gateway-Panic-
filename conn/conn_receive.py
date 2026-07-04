@@ -1,15 +1,30 @@
 import threading
-from conn.conn_socket import SocketConn
-from scapy.contrib.bgp import BGPHeader
-from conn.conn_handle import handle_open, handle_keepalive, handle_notification, handle_update, handle_route_refresh
 import re
 import binascii
+from scapy.contrib.bgp import BGPHeader
+from typing import Optional
+
+from conn.conn_socket import SocketConn
+from conn.conn_handle import (
+    handle_open, handle_keepalive, handle_notification, handle_update, handle_route_refresh
+)
 
 
-def get_open_bgp(conn):
+def get_open_bgp(conn: SocketConn) -> Optional[bytes]:
+    """Retrieve and process the initial incoming BGP OPEN session establishment frame
+
+    Blocks until a network frame payload arrives on the socket interface. If raw data 
+    is received, it casts it as a standard BGPHeader layer to evaluate baseline session 
+    connectivity variables
+
+    Args:
+        conn (SocketConn): The underlying active TCP control socket connecting the peer
+
+    Returns:
+        Optional[bytes]: The raw unparsed network byte string if received successfully, 
+            or None if the socket returns empty context
     """
-    Used for getting the first OPEN msg from client to confirm connectivity.
-    """
+
     response = conn.recv()
 
     if not response:
@@ -21,7 +36,14 @@ def get_open_bgp(conn):
     return response
 
 
-def run_receiver(conn):
+def run_receiver(conn:SocketConn) -> None:
+    """Initialize and dispatch receive thread to receive all BGP packets
+
+    Spawns a thread that receives BGP packets from neighbors
+
+    Args:
+        conn (SocketConn): The underlying active TCP control socket connecting the peer
+    """
 
     try:
         print('[*] Attempting to run receiver in the background...')
@@ -35,10 +57,21 @@ def run_receiver(conn):
         print('[+] Receiver running in the background')
 
     except Exception as e:
-        print("[x] Something went wrong: ", e)
+        print("[x] Something went wrong [run_receiver]: ", e)
 
 
-def receive_BGP(conn):
+def receive_BGP(conn:SocketConn) -> None:
+    """Continuously intercept network frames and reassemble coalesced BGP stream packages
+
+    Reads raw streams off the underlying network socket interface, performs hexadecimal 
+    regex splitting using the standard 16-byte BGP synchronization marker boundary 
+    (0xFFFF...FFFF) to counter TCP aggregation anomalies, fragments individual payload arrays, 
+    and routes them to dedicated type-code action controllers
+
+    Args:
+        conn (SocketConn): The underlying active TCP control socket connecting the peer
+    """
+
     while True:
 
         try:
@@ -73,13 +106,14 @@ def receive_BGP(conn):
                         print(f"\n[x] Received unknown bgp packet type")
 
         except ConnectionAbortedError as e:
-            print(f"\n[x] Connection aborted: {e}")
+            print(f"\n[x] Connection aborted [conn_receive]: {e}")
             break
 
         except ConnectionResetError as e:
-            print(f"\n[x] Connection reset: {e}")
+            print(f"\n[x] Connection reset [conn_receive]: {e}")
             break
 
         except Exception as e:
-            print(f"\n[x] Unexpected receive error: {e}")
+            print(f"\n[x] Unexpected receive error [conn_receive]: {e}")
             break
+            

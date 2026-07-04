@@ -1,17 +1,19 @@
-from misc.logging import handle_log
-from misc.grab_config import get_config
-from conn.parse_BGP import parse_update_BGP
-from scapy.contrib.bgp import *
-from misc.status import change_status
-from conn.conn_decoding import decode_bgp_notification
-from conn.conn_UPDATE import send_empty_UPDATE
 import json
 import os
+from scapy.contrib.bgp import BGPHeader, BGPNotification
+
+from misc.logging import handle_log
+from misc.grab_config import get_config
+from misc.status import change_status
+from conn.parse_BGP import parse_update_BGP
+from conn.conn_decoding import decode_bgp_notification
+from conn.conn_UPDATE import send_empty_UPDATE
 
 RIB_FILE = './resources/route.json'
-
+"""str: File path to local Routing Information Base (RIB)"""
 
 ip = get_config(["neighbor_ip"])["neighbor_ip"]
+"""str: Cached IP address of the target BGP neighbor peer"""
 
 TYPE_MAP = {
     1: "ORIGIN",
@@ -21,9 +23,18 @@ TYPE_MAP = {
     5: "LOCAL_PREF",
     8: "COMMUNITY",
 }
+"""dict[int, str]: Mapping of BGP path attribute type codes to names per RFC 4271"""
 
 
-def handle_open(bgp):
+def handle_open(bgp:BGPHeader) -> None:
+    """Handle incoming BGP OPEN session packets and register connectivity state
+
+    Sets the internal configuration operational status and immediately inspects the 
+    packet boundary for nested BGP notification layers
+
+    Args:
+        bgp (BGPHeader): The raw Scapy BGP header object container
+    """
 
     change_status('bgp_connection', 1)
 
@@ -31,17 +42,25 @@ def handle_open(bgp):
         handle_notification(bgp)
 
 
-def handle_keepalive(bgp):
-    """
-    Just logs keep alive
+def handle_keepalive(bgp:BGPHeader) -> None:
+    """Log passive BGP KEEPALIVE confirmation packets from the peer
+
+    Args:
+        bgp (BGPHeader): The raw Scapy BGP header object container
     """
 
     handle_log(f"KEEPALIVE received from {ip}", "bgp.log")
 
-    return 0
 
+def handle_notification(bgp:BGPHeader) -> None:
+    """Process an error notification packet and teardown active connections
 
-def handle_notification(bgp):
+    Extracts error codes, decodes them to human-readable strings, flags the local 
+    connection state matrix as inactive
+
+    Args:
+        bgp (BGPHeader): The raw Scapy BGP header object container
+    """
 
     msg = bgp[BGPNotification]
     change_status('bgp_connection', 0)
@@ -51,65 +70,35 @@ def handle_notification(bgp):
         f"NOTIFICATION received from {ip}: "
         f"{error_msg} (code={msg.error_code}, subcode={msg.error_subcode})"
     )
+
     print(f"[x] {notification_msg}")
     handle_log(notification_msg, "bgp.log")
 
 
-# withdrawn routes (routes that are removed) - remove from routing table
-# as_path (describes how to reach a prefix)
-#   List of AS numbers the route passed through
-#   Used for loop prevention + best path selection
+def handle_update(bgp:BGPHeader) -> None:
+    """Parse incoming BGP UPDATE packets and dynamically update the local RIB database
 
-# next_hop - ip addr to forward packets to
-# local_pref - higher = more preferred (inside IBGP)
-# MED (Multi Exit Discriminator) - Lower = between ASes
-# Origin - How route was learnt (IBGP, EBGP, Incomplete)
-# NLRI (Network Layer Reachability Info) - actual routes being advertised
-#   e.g. 10.10.10.0/24
+    Reads the current JSON RIB database file, removes explicitly withdrawn routes, 
+    extracts standardized path attributes (such as AS_PATH, ORIGIN, NEXT_HOP, and MED), 
+    and inserts or updates active NLRI fields before writing changes back to disk
 
-# def handle_update(bgp):
-#     print("\n[+] UPDATE received")
+    Args:
+        bgp (BGPHeader): The raw Scapy BGP header object container
+    """
 
-#     update_msg = bgp.payload
-#     print(f"Withdrawn Routes Len: {update_msg.withdrawn_routes_len}\n")
-#     print(f"Withdrawn Routes: {update_msg.withdrawn_routes}\n")
-#     print(f"Path Attribute Len: {update_msg.path_attr_len}\n")
-#     print(f"Path Attribute: {update_msg.path_attr[0].type_flags}\n")
+    print("\n[+] Received UPDATE packet")
 
-#     # SEPERATE OBJ LIAO, NOW JUST WRITE IN ROUTE.TXT FOR RIB
-#     for field in update_msg.path_attr:
-#         match field.type_code:
-#             case 1: # origin
-#                 print(field.attribute.origin) # 0 IGB, 1 EBG, 2 = others
-#             case 2: # as_path
-#                 for segments in field.attribute.segments:
-#                     print(segments.segment_value)
-#             case 3: # next_hop
-#                 print(field.attribute.next_hop)
-#             case _:
-#                 print(TYPE_MAP.get(field.type_code), field.attribute.med, "MED")
-
-#     print(f"NLRI:")
-#     for nlri in update_msg.nlri:
-#         print(nlri.prefix)
-    
-#     parse_update_BGP(bgp)
-
-
-def handle_update(bgp):
     print("\n[+] Received UPDATE packet")
     update_msg = bgp.payload
 
-    # Load existing RIB
+    # load existing RIB
     if os.path.exists(RIB_FILE) and os.path.getsize(RIB_FILE) > 0:
         with open(RIB_FILE, "r") as f:
             rib = json.load(f)
     else:
         rib = {}
 
-    #
-    # Handle Withdrawn Routes
-    #
+    # handle WITHDRAWN routes
     if update_msg.withdrawn_routes_len > 0:
 
         for route in update_msg.withdrawn_routes:
@@ -122,9 +111,7 @@ def handle_update(bgp):
             else:
                 print(f"[!] Withdrawn route not found: {prefix}")
 
-    #
-    # Extract Path Attributes
-    #
+    # extract path attributes
     origin = None
     as_path = []
     next_hop = None
@@ -147,9 +134,7 @@ def handle_update(bgp):
             case 4:  # MED
                 med = field.attribute.med
 
-    #
-    # Add/Update NLRI
-    #
+    # add/update NLRI
     for nlri in update_msg.nlri:
 
         prefix = str(nlri.prefix)
@@ -163,13 +148,20 @@ def handle_update(bgp):
 
         print(f"[+] Route updated: {prefix}")
 
-    #
-    # Save RIB
-    #
+    # write file
     with open(RIB_FILE, "w") as f:
         json.dump(rib, f, indent=4)
 
 
-def handle_route_refresh(bgp, conn):
+def handle_route_refresh(bgp:BGPHeader, conn:any) -> None:
+    """Process a BGP ROUTE REFRESH request message from a network peer
+
+    Logs the incoming packet and responds by pushing an empty BGP UPDATE packet 
+
+    Args:
+        bgp (BGPHeader): The raw Scapy BGP header object container
+        conn (socket.socket): The underlying active TCP control socket connecting the peer
+    """
+    
     handle_log(f"ROUTE REFRESH received from {ip}", "bgp.log")
     send_empty_UPDATE(conn)

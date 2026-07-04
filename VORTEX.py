@@ -1,24 +1,21 @@
-######################################################################
-# 1. Create Open Msg & Update Msg
-# 2. Create broadcast msg to understand entire network
-# 3. Find a way to hijack (hijack what, and how)
-# 4. Post Exploit
-######################################################################
-
-# Things to do
-# exit thread when exit
-
 import time
-
 from scapy.all import *
 from scapy.contrib.bgp import BGPHeader, BGPOpen
-
-
-from misc.main_menu import main_menu
 import socket
 
+from misc.main_menu import main_menu
 
-def main():
+
+def main() -> None:
+    """Entry point for the BGP tool CLI application
+
+    Initializes runtime state by clearing previous session logs and routing
+    database files, then launches the interactive command-line interface.
+
+    The function runs an infinite loop that delegates control to the CLI
+    handler (main_menu), effectively keeping the application alive until
+    explicitly terminated via user command.
+    """
 
     with open('./resources/profile.log', 'w') as f:
         pass

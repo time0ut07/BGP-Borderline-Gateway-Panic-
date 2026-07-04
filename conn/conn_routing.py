@@ -1,10 +1,20 @@
 ROUTE_FILE = "./resources/route.txt"
+"""str: File path to the local text-based routing table database"""
 
 
-def update_route(update_msg) -> None:
+def update_route(update_msg:object) -> None:
+    """Update the local routing table using information from a BGP UPDATE message
+
+    Loads the existing route database, removes any withdrawn prefixes, extracts
+    supported path attributes such as NEXT_HOP and AS_PATH, updates advertised
+    NLRI entries, and writes the resulting routing table back to persistent
+    storage
+
+    Args:
+        update_msg: A parsed BGP UPDATE message containing withdrawn routes,
+            path attributes, and newly advertised network prefixes
     """
-    Maintains simple BGP-like routing table based on BGP UPDATE
-    """
+
     route_table = {}
 
     try:

@@ -4,11 +4,19 @@ from misc.config_validation import validate_config
 from misc.add_route import add_route
 
 
-def cmd_change_config(args):
-    """Usage: config change key=value key2=value2 ..."""
+def cmd_change_config(args: list[str]) -> None:
+    """Modify configuration settings from a list of key-value pair
+
+    Parses the command-line arguments and validates each key against
+    existing configuration. It then validates the new value format
+    and saves the updated configuration file
+
+    Args:
+        args (list[str]): A list of strings in 'key=value' format
+    """
 
     if not args:
-        print("Usage: config change key=value key2=value2 ...")
+        print("[*] Usage: config change key=value key2=value2 ...")
         return
 
     config = get_config()
@@ -36,7 +44,13 @@ def cmd_change_config(args):
     save_config(config)
 
 
-def cmd_view_config():
+def cmd_view_config() -> None:
+    """Retrieve & display current configuration in console
+
+    Fetches the configuration display & prints each key-value pair,
+    substituting empty with an '(empty)' placeholder
+    """
+
     config = get_config()
 
     print("\nCurrent configs:")
@@ -44,11 +58,27 @@ def cmd_view_config():
         print(f"  {key} = {value or '(empty)'}")
 
 
-def cmd_add_route(args):
+
+
+
+
+
+
+
+
+
+
+
+
+
+def cmd_add_route(args: list[str]) -> None:
+    """
+
+    """
+
     if not args:
-        print("Usage: config route prefix=x.x.x.x/x next_hop=x.x.x.x")
-        print("Optional: as_path=65001,65002 origin=0 med=0")
-        return
+        print("[*] Usage: config add-route prefix=x.x.x.x/x next_hop=x.x.x.x")
+        print("[*] Optional: as_path=65001,65002 origin=0 med=0")
 
     params = {}
     for pair in args:
@@ -59,5 +89,3 @@ def cmd_add_route(args):
         params[key.strip()] = value.strip()
 
     add_route(params)
-
-

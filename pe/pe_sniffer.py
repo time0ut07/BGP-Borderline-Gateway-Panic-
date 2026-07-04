@@ -13,10 +13,7 @@ routing_handler = None
 def monitor_routing():
     global routing_handler
     routing_handler = get_routing_handler()
-    import time
-    while get_status('routing') is True:
-        print("YES")
-        time.sleep(2)
+    print("Routing Handler Loaded")
 
 def run_routing(toggle):
     global routing_thread, routing_handler
@@ -61,13 +58,17 @@ def run_routing(toggle):
 
 
 def log_sniffer(pkt):
-
+    print("pkt received")
     # BLOCK BGP (TCP port 179)
     if TCP in pkt:
         if pkt[TCP].sport == 179 or pkt[TCP].dport == 179:
             return
+    print(f"routing status: {get_status('routing')}")
+    print(f"routing_handler: {routing_handler}")
+
 
     if get_status('routing') is True and routing_handler is not None:
+        print("calling routing handler")
         routing_handler(pkt)
     log_msg = ""
 
@@ -134,7 +135,7 @@ def run_sniffer(toggle):
             promisc=True
         )
         sniffer.start()
-        
+        print(f"[+] Sniffer started on {get_config(['iface'])['iface']}")
         # routing_thread = threading.Thread(
         #     target=monitor_routing, 
         #     daemon=True
