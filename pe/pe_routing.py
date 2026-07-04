@@ -6,14 +6,35 @@ from scapy.all import getmacbyip
 
 
 def is_hijacked(dst_ip: str) -> bool:
-    """
-    checks if destination IP falls within any hijacked prefix in rib
+    """Checks if a destination IP falls within any hijacked prefix in the RIB.
+
+    Performs a longest-prefix match lookup against the local RIB to determine
+    if the given destination IP belongs to a prefix that has been hijacked.
+
+    Args:
+        dst_ip (str): The destination IP address to check
+
+    Returns:
+        bool: True if the IP falls within a hijacked prefix, False otherwise
     """
     result = dig_RIB(dst_ip)
     return result is not None
 
 
 def get_routing_handler():
+    """Builds and returns a packet handler function for post-exploitation routing.
+
+    Reads the routing configuration to determine the mode of operation. In
+    blackhole mode, intercepted packets are silently dropped. In forward mode,
+    packets are rewritten with a new destination IP and MAC address and
+    re-injected onto the network. The handler is intended to be used as a
+    callback in the AsyncSniffer.
+
+    Returns:
+        function: A packet handler function that intercepts and processes
+                  packets destined for hijacked prefixes, or None if the
+                  destination MAC address cannot be resolved in forward mode
+    """
     config = get_config(["route_dest_ip", "iface"])
     pe_route_dest = config["route_dest_ip"]
     iface = config["iface"]
@@ -26,6 +47,14 @@ def get_routing_handler():
         return None
 
     def process_packet(pkt):
+        """Processes a single captured packet and applies routing decision.
+
+        Checks if the packet destination falls within a hijacked prefix and
+        either blackholes or forwards it depending on the configured mode.
+
+        Args:
+            pkt: A scapy packet object captured by the AsyncSniffer
+        """
         if IP not in pkt:
             print("No IP Layer, Skipping")
             return

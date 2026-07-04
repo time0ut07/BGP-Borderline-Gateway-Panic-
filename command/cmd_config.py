@@ -1,7 +1,7 @@
 from misc.save_config import save_config
 from misc.grab_config import get_config
 from misc.config_validation import validate_config
-from misc.add_route import add_route
+from misc.add_route import add_route, view_routes, remove_route
 
 
 def cmd_change_config(args: list[str]) -> None:
@@ -56,29 +56,23 @@ def cmd_view_config() -> None:
     print("\nCurrent configs:")
     for key, value in config.items():
         print(f"  {key} = {value or '(empty)'}")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        
 
 def cmd_add_route(args: list[str]) -> None:
-    """
+    """Parses CLI arguments and passes them to add_route for RIB injection.
 
+    Converts a list of key=value argument strings into a dictionary and
+    forwards it to the add_route function for validation and insertion
+    into the local RIB.
+
+    Args:
+        args (list[str]): A list of strings in 'key=value' format
     """
 
     if not args:
         print("[*] Usage: config add-route prefix=x.x.x.x/x next_hop=x.x.x.x")
         print("[*] Optional: as_path=65001,65002 origin=0 med=0")
+        return
 
     params = {}
     for pair in args:
@@ -89,3 +83,28 @@ def cmd_add_route(args: list[str]) -> None:
         params[key.strip()] = value.strip()
 
     add_route(params)
+
+def cmd_view_routes(args=None):
+    """Display all routes in the local RIB."""
+    view_routes()
+
+
+def cmd_remove_route(args: list[str]) -> None:
+    """Parse CLI arguments and remove a route from the RIB.
+    
+    Args:
+        args (list[str]): A list of strings in 'key=value' format
+    """
+    if not args:
+        print("[*] Usage: config remove-route prefix=x.x.x.x/x")
+        return
+
+    params = {}
+    for pair in args:
+        if "=" not in pair:
+            print(f"[-] Skipping '{pair}', expected format: key=value")
+            continue
+        key, value = pair.split("=", 1)
+        params[key.strip()] = value.strip()
+
+    remove_route(params)

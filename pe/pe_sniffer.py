@@ -11,12 +11,27 @@ sniffer = None
 routing_handler = None
 
 def monitor_routing():
+    """Loads the routing handler from pe_routing into the global routing_handler.
+
+    Calls get_routing_handler to build and return the configured packet
+    processing function, which is then used by log_sniffer to intercept
+    and route packets destined for hijacked prefixes.
+    """
     global routing_handler
     routing_handler = get_routing_handler()
     print("Routing Handler Loaded")
 
-def run_routing(toggle):
-    global routing_thread, routing_handler
+def run_routing(toggle: bool) -> None:
+    """Starts or stops the post-exploitation routing module.
+
+    When enabled, automatically starts the sniffer if it is not already
+    running, then loads the routing handler. When disabled, clears the
+    routing handler so log_sniffer stops processing packets for routing.
+
+    Args:
+        toggle (bool): True to start routing, False to stop routing
+    """
+    global routing_handler
 
     if get_status('bgp_connection') is not True:
         print("[x] Establish a BGP connection first")
@@ -32,13 +47,6 @@ def run_routing(toggle):
             run_sniffer(True)
         
         change_status('routing', 1)
-
-        # routing_thread = threading.Thread(
-        #     target=monitor_routing,
-        #     daemon=True
-        # )
-
-        # routing_thread.start()
         monitor_routing()
         print("[+] Routing started")
 
@@ -48,23 +56,25 @@ def run_routing(toggle):
             return None
         
         change_status('routing', 0)
-
-        # if routing_thread is not None:
-        #     routing_thread.join(timeout=2)
-        #     routing_thread = None
-        #     print("[-] Routing stopped")
         routing_handler = None
         print("[-] Routing stopped")
 
 
-def log_sniffer(pkt):
-    print("pkt received")
+def log_sniffer(pkt) -> None:
+    """Processes each packet captured by the AsyncSniffer.
+
+    Filters out BGP control traffic on port 179, passes packets to the
+    routing handler if routing is enabled, then logs the packet details
+    to the traffic log file.
+
+    Args:
+        pkt: A scapy packet object captured by the AsyncSniffer
+    """
+
     # BLOCK BGP (TCP port 179)
     if TCP in pkt:
         if pkt[TCP].sport == 179 or pkt[TCP].dport == 179:
             return
-    print(f"routing status: {get_status('routing')}")
-    print(f"routing_handler: {routing_handler}")
 
 
     if get_status('routing') is True and routing_handler is not None:
@@ -109,11 +119,19 @@ def log_sniffer(pkt):
 
 
 def run_sniffer(toggle):
-    """
-    Starts/stops Scapy sniffer using AsyncSniffer
+    """Starts or stops the AsyncSniffer for network traffic capture.
+
+    When enabled, creates and starts an AsyncSniffer instance on the
+    configured network interface in promiscuous mode. When disabled,
+    stops the sniffer and also stops routing if it is currently running.
+
+    Args:
+        toggle (bool): True to start sniffing, False to stop sniffing
+
+    Returns:
+        AsyncSniffer: The active sniffer instance if starting, None otherwise
     """
     global sniffer
-    global routing_thread
 
     if get_status('bgp_connection') is not True:
         print("[x] Establish a BGP connection first")
@@ -131,18 +149,10 @@ def run_sniffer(toggle):
             iface=get_config(['iface'])['iface'],
             prn=log_sniffer,
             store=False,
-            #filter="ip or arp",
             promisc=True
         )
         sniffer.start()
         print(f"[+] Sniffer started on {get_config(['iface'])['iface']}")
-        # routing_thread = threading.Thread(
-        #     target=monitor_routing, 
-        #     daemon=True
-        # )
-
-        # routing_thread.start()
-
         print("[+] Sniffing started")
 
         return sniffer
@@ -155,13 +165,17 @@ def run_sniffer(toggle):
 
         change_status('sniff', 0)
 
-        # if get_status('routing') is True:
-        #     print("[*] Stopping routing as sniffer is being disabled...")
-        #     monitor_routing(False)
+        if get_status('routing') is True:
+            print("[*] Stopping routing as sniffer is being disabled...")
+            run_routing(False)
 
         if sniffer is not None:
-            sniffer.stop()
-            sniffer = None
-            print("[-] Sniffing stopped")
+            try:
+                sniffer.stop()
+            except Exception as e:
+                print(f"[!] Sniffer stop warning: {e}")
+            finally:
+                sniffer = None
+                print("[-] Sniffing stopped")
 
         return None

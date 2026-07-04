@@ -1,9 +1,10 @@
 from dataclasses import dataclass, field
+from typing import Callable
 
 from command.cmd_help import show_help
 from command.cmd_exit import exit_app
 from conn.conn_run import conn_run
-from command.cmd_config import cmd_change_config, cmd_view_config, cmd_add_route
+from command.cmd_config import cmd_change_config, cmd_view_config, cmd_add_route, cmd_view_routes, cmd_remove_route
 from command.cmd_clear_log import clear_all_logs
 from pe.pe_sniffer import run_sniffer, run_routing
 
@@ -121,6 +122,16 @@ def add_route(args:list[str] | None = None) -> None:
     cmd_add_route(args)
 
 
+def view_routes(args: list[str] | None = None) -> None:
+    """Display all routes currently stored in the local RIB."""
+    cmd_view_routes()
+
+
+def remove_route(args: list[str] | None = None) -> None:
+    """Remove a route from the local RIB by prefix."""
+    cmd_remove_route(args)
+
+
 def clear_bgp_logs(args:list[str] | None = None) -> None:
     """Truncate all text contents in './resources/bgp.log'
     """
@@ -198,8 +209,20 @@ COMMANDS = {
 
             "add-route": Command(
                 name="add-route",
-                description="Manually add a route to route.json",
+                description="Manually add a route in RIB",
                 handler=add_route,
+            ),
+
+            "view-routes": Command(
+                name="view-routes",
+                description="View all routes in RIB",
+                handler=view_routes,
+            ),
+
+            "remove-route": Command(
+                name="remove-route",
+                description="Remove a route from RIB",
+                handler=remove_route,
             ),
         },
     ),

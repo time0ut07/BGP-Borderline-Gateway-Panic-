@@ -91,7 +91,9 @@ sudo python VORTEX.py
 |--------|-------------|---------|
 | `config view` | Displays current configuration values | `config view` |
 | `config change key=value` | Updates a configuration parameter | `config change hold_time=30` |
-| `config add-route` | Manually injects a route into the RIB | `config add-route prefix=10.0.0.0/24 next_hop=192.168.1.1` |
+| `config add-route` | Manually add a route into the RIB | `config add-route prefix=10.0.0.0/24 next_hop=192.168.1.1` |
+| `config view-routes` | View all routes in RIB | `config view-routes` |
+| `config remove-route` | Remove specified route in RIB | `config remove-route prefix=10.0.0.0/24` |
 
 ---
 
@@ -119,4 +121,23 @@ sudo python VORTEX.py
 
 | Command | Description | Example |
 |--------|-------------|---------|
+| `help` | Displays all available commands and descriptions | `help` |
 | `exit` | Gracefully shuts down the application | `exit` |
+
+
+### Configuration Reference
+| Key | Description | Example |
+|-----|-------------|---------|
+| `version` | BGP version | `4` |
+| `port` | Local BGP port | `179` |
+| `protocol` | Transport protocol | `tcp` |
+| `asn` | Your AS number | `65003` |
+| `hold_time` | BGP hold time in seconds | `90` |
+| `bgp_id` | Your BGP router IP | `192.168.1.1` |
+| `neighbor_ip` | Peer router IP address | `192.168.1.2` |
+| `neighbor_asn` | Peer router AS number | `65002` |
+| `neighbor_port` | Peer BGP port | `179` |
+| `nlri` | Prefix to advertise in BGP UPDATE | `10.0.0.0/24` |
+| `iface` | Network interface for sniffing and routing | `eth0` |
+| `route_dest_ip` | Routing destination IP (0.0.0.0 for blackhole) | `0.0.0.0` |
+| `route_dest_mac` | Destination MAC address for forward mode | `aa:bb:cc:dd:ee:ff` |
