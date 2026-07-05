@@ -1,8 +1,8 @@
-# VORTEX
+# BORTEX
 
 A modular BGP simulation and network control CLI designed for experimenting with BGP session establishment, UPDATE processing, routing table manipulation, and post-session traffic analysis features such as packet sniffing and routing control.
 
-This project emulates simplified BGP behavior using Scapy and a file-based routing system, combined with a command-driven interface for interactive control.
+This tool emulates simplified BGP behavior using Scapy and a file-based routing system, combined with a command-driven interface for interactive control.
 
 > ⚠️ This tool is intended strictly for **educational, research, and controlled lab environments**.
 
@@ -71,10 +71,12 @@ pip install -r requirements.txt
 
 ### Running the tool
 ```bash
-sudo python VORTEX.py
+# Ensure you are in the root directory
+sudo python BORTEX.py
 ```
 
 ## Command Reference
+Commands available in BORTEX
 
 ### Connection Commands
 
@@ -125,7 +127,8 @@ sudo python VORTEX.py
 | `exit` | Gracefully shuts down the application | `exit` |
 
 
-### Configuration Reference
+## Configuration Reference
+Configurations that can be changed using `config change key=value` command, stored in resources/config.txt.
 | Key | Description | Example |
 |-----|-------------|---------|
 | `version` | BGP version | `4` |
@@ -141,3 +144,24 @@ sudo python VORTEX.py
 | `iface` | Network interface for sniffing and routing | `eth0` |
 | `route_dest_ip` | Routing destination IP (0.0.0.0 for blackhole) | `0.0.0.0` |
 | `route_dest_mac` | Destination MAC address for forward mode | `aa:bb:cc:dd:ee:ff` |
+
+## Resources Reference
+Files under resources folder
+
+| File Name | Description |
+|-----------|-------------|
+| `bgp.log` | Logs BGP packets sent and received (OPEN, KEEPALIVE, UPDATE, NOTIFICATION) |
+| `config.txt` | Stores BGP configuration parameters (version, ASN, hold time, neighbor IP, etc.) |
+| `profile.log` | Records parsed BGP session profile data. OPEN message details (version, ASN, hold time, router ID) and UPDATE message contents (withdrawn routes, path attributes, NLRI) |
+| `route.json` | Local Routing Information Base (RIB) in JSON format. Maps network prefixes to their AS_PATH, ORIGIN, NEXT_HOP, and MED attributes |
+| `status` | Boolean status flags for runtime state tracking: `bgp_connection`, `sniff`, and `routing` (stored as `key=1` or `key=0`) |
+| `traffic.log` | Logs captured network traffic packets (IP, TCP, UDP, ICMP, ARP) from the sniffer engine |
+
+## Folder References
+| Folder | Description |
+|--------|-------------|
+| `command` | CLI command definitions and dispatch, maps user input to handler functions (connection, config, post-exploit, log management) |
+| `conn` | BGP connection engine, socket management, OPEN/KEEPALIVE/UPDATE/NOTIFICATION packet construction, parsing, and receiver thread |
+| `misc` | Utility modules, configuration I/O, logging, status flags, routing helpers, input validation, and CLI menu |
+| `pe` | Post-exploitation modules, live packet sniffing engine and traffic routing/manipulation (MITM, blackhole, forward) |
+| `resources` | Runtime data files, BGP config, session logs, traffic logs, profile data, RIB database, and status flags |

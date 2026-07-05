@@ -12,6 +12,6 @@ def exit_app() -> None:
     change_status('sniff', 0)
     change_status('routing', 0)
 
-    print('[+] Exiting VORTEX gracefully...')
+    print('[+] Exiting BORTEX gracefully...')
 
     sys.exit(1)

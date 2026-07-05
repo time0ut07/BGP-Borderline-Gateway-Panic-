@@ -21,7 +21,7 @@ def main_menu():
 
     while True:
         try:
-            raw = input("\nVORTEX >> ").strip()
+            raw = input("\nBORTEX >> ").strip()
 
             if not raw:
                 continue
