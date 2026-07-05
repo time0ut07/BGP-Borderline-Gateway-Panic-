@@ -23,7 +23,7 @@ def main() -> None:
     with open('./resources/route.json', 'w') as f:
         pass
     
-    print("\nWelcome to BGP Tool Name\n[help] to see existing commands\n[exit] to exit")
+    print("\nWelcome to BORTEX\n[help] to see existing commands\n[exit] to exit")
     while True:
         action = main_menu()
 

@@ -38,7 +38,7 @@ def conn_run(mode: str, connection: SocketConn | None = None) -> SocketConn | No
         return connection
 
     elif mode == "UPDATE": 
-        if connection is None and get_status('bgp_connection') is not True:
+        if connection is None or get_status('bgp_connection') is not True:
             print("[-] No active connection...")
             return None
 

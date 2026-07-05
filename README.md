@@ -49,9 +49,9 @@ This tool emulates simplified BGP behavior using Scapy and a file-based routing 
 ---
 
 ### Logging
-- BGP session logs → `resources/bgp.log`
-- Traffic logs → `resources/traffic.log`
-- Session profile logs → `resources/profile.log`
+- BGP session logs -> `resources/bgp.log`
+- Traffic logs -> `resources/traffic.log`
+- Session profile logs -> `resources/profile.log`
 - Timestamped event logging system
 
 ---
@@ -77,6 +77,13 @@ sudo python BORTEX.py
 
 ## Command Reference
 Commands available in BORTEX
+
+### System Commands
+
+| Command | Description | Example |
+|--------|-------------|---------|
+| `help` | Displays all available commands and descriptions | `help` |
+| `exit` | Gracefully shuts down the application | `exit` |
 
 ### Connection Commands
 
@@ -119,14 +126,6 @@ Commands available in BORTEX
 
 ---
 
-### System Commands
-
-| Command | Description | Example |
-|--------|-------------|---------|
-| `help` | Displays all available commands and descriptions | `help` |
-| `exit` | Gracefully shuts down the application | `exit` |
-
-
 ## Configuration Reference
 Configurations that can be changed using `config change key=value` command, stored in resources/config.txt.
 | Key | Description | Example |
@@ -143,7 +142,8 @@ Configurations that can be changed using `config change key=value` command, stor
 | `nlri` | Prefix to advertise in BGP UPDATE | `10.0.0.0/24` |
 | `iface` | Network interface for sniffing and routing | `eth0` |
 | `route_dest_ip` | Routing destination IP (0.0.0.0 for blackhole) | `0.0.0.0` |
-| `route_dest_mac` | Destination MAC address for forward mode | `aa:bb:cc:dd:ee:ff` |
+
+---
 
 ## Resources Reference
 Files under resources folder
@@ -156,6 +156,8 @@ Files under resources folder
 | `route.json` | Local Routing Information Base (RIB) in JSON format. Maps network prefixes to their AS_PATH, ORIGIN, NEXT_HOP, and MED attributes |
 | `status` | Boolean status flags for runtime state tracking: `bgp_connection`, `sniff`, and `routing` (stored as `key=1` or `key=0`) |
 | `traffic.log` | Logs captured network traffic packets (IP, TCP, UDP, ICMP, ARP) from the sniffer engine |
+
+---
 
 ## Folder References
 | Folder | Description |

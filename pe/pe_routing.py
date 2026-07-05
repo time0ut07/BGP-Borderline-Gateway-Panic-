@@ -56,7 +56,7 @@ def get_routing_handler():
             pkt: A scapy packet object captured by the AsyncSniffer
         """
         if IP not in pkt:
-            print("No IP Layer, Skipping")
+            print("[x] No IP Layer, Skipping")
             return
 
         dst = pkt[IP].dst

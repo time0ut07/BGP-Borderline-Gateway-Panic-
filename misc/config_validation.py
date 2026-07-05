@@ -124,10 +124,6 @@ def validate_config(key:str, value:str, config:dict) -> tuple[bool, str, str]:
         if not is_valid_ipv4(value):
             return False, value, f"{key} must be a valid IPv4 address."
         return True, value, ""
-        
-    if key == "route_dest_mac":
-        if not is_valid_mac(value):
-            return False, value, "route_dest_mac must be a valid MAC address (xx:xx:xx:xx:xx:ff) and cannot be broadcast."
-        return True, value.lower(), ""
 
     return True, value, ""
+    

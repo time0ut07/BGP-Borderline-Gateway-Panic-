@@ -19,7 +19,8 @@ def monitor_routing():
     """
     global routing_handler
     routing_handler = get_routing_handler()
-    print("Routing Handler Loaded")
+    print("[+] Routing Handler Loaded")
+
 
 def run_routing(toggle: bool) -> None:
     """Starts or stops the post-exploitation routing module.
@@ -78,7 +79,7 @@ def log_sniffer(pkt) -> None:
 
 
     if get_status('routing') is True and routing_handler is not None:
-        print("calling routing handler")
+        print("[*] Calling routing handler")
         routing_handler(pkt)
     log_msg = ""
 

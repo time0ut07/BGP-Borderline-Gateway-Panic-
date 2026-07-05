@@ -103,17 +103,17 @@ def receive_BGP(conn:SocketConn) -> None:
                     case 5:
                         handle_route_refresh(indiv_bgp, conn)
                     case _:
-                        print(f"\n[x] Received unknown bgp packet type")
+                        print(f"[x] Received unknown bgp packet type")
 
         except ConnectionAbortedError as e:
-            print(f"\n[x] Connection aborted [conn_receive]: {e}")
+            print(f"[x] Connection aborted [conn_receive]: {e}")
             break
 
         except ConnectionResetError as e:
-            print(f"\n[x] Connection reset [conn_receive]: {e}")
+            print(f"[x] Connection reset [conn_receive]: {e}")
             break
 
         except Exception as e:
-            print(f"\n[x] Unexpected receive error [conn_receive]: {e}")
+            print(f"[x] Unexpected receive error [conn_receive]: {e}")
             break
             

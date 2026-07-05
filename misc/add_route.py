@@ -146,7 +146,7 @@ def view_routes() -> None:
         print("[*] RIB is empty")
         return
 
-    print(f"\n{'Prefix':<22} {'Next Hop':<18} {'AS Path':<20} {'Origin':<10} {'MED'}")
+    print(f"{'Prefix':<22} {'Next Hop':<18} {'AS Path':<20} {'Origin':<10} {'MED'}")
     print("-" * 80)
 
     origin_map = {0: "IGP", 1: "EGP", 2: "INCOMPLETE"}

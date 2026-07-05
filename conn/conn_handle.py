@@ -36,10 +36,11 @@ def handle_open(bgp:BGPHeader) -> None:
         bgp (BGPHeader): The raw Scapy BGP header object container
     """
 
-    change_status('bgp_connection', 1)
-
     if BGPNotification in bgp:
         handle_notification(bgp)
+        return None
+
+    change_status('bgp_connection', 1)
 
 
 def handle_keepalive(bgp:BGPHeader) -> None:
@@ -86,9 +87,9 @@ def handle_update(bgp:BGPHeader) -> None:
         bgp (BGPHeader): The raw Scapy BGP header object container
     """
 
-    print("\n[+] Received UPDATE packet")
+    print("[+] Received UPDATE packet")
 
-    print("\n[+] Received UPDATE packet")
+    print("[+] Received UPDATE packet")
     update_msg = bgp.payload
 
     # load existing RIB

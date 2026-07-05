@@ -68,7 +68,7 @@ def conn_KEEPALIVE(conn:SocketConn, interval:float) -> None:
             
             if get_status('bgp_connection') is True:
                 conn.send(keepalive_pkt)
-                print("\n[+] KEEPALIVE sent\n")
+                print("[+] KEEPALIVE sent\n")
                 handle_log(f"KEEPALIVE sent to {ip}", "bgp.log")
                 time.sleep(interval)
             else:
